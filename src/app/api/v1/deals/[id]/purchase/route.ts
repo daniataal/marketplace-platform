@@ -28,10 +28,13 @@ export async function POST(
             return NextResponse.json({ error: "Deal is not available" }, { status: 400 });
         }
 
-        // 2. Update Status to CLOSED locally
+        // 2. Update Status to CLOSED locally and assign to buyer
         const updatedDeal = await prisma.deal.update({
             where: { id: dealId },
-            data: { status: "CLOSED" }
+            data: {
+                status: "CLOSED",
+                buyerId: session.user.id
+            }
         });
 
         // 3. Export to Crowdfunding

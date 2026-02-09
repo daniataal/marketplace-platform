@@ -3,6 +3,7 @@ import { DealCard } from "@/components/DealCard";
 import { RefreshCcw, LogOut, User } from "lucide-react";
 import ClientBuyButton from "@/components/ClientBuyWrapper";
 import { auth, signOut } from "@/auth";
+import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
@@ -21,40 +22,7 @@ export default async function Dashboard() {
             <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-accent/20 rounded-full blur-[100px] pointer-events-none z-0 mix-blend-screen" />
             <div className="absolute bottom-[10%] left-[10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] pointer-events-none z-0" />
 
-            <nav className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Link href="/" className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                                <span className="text-white font-bold">M</span>
-                            </div>
-                            <span className="text-xl font-bold text-foreground">Marketplace</span>
-                        </Link>
-                    </div>
-                    <div className="flex items-center gap-6">
-                        <div className="text-sm text-muted-foreground hidden md:block">
-                            {deals.length} Active Deals
-                        </div>
-                        <div className="flex items-center gap-3 pl-6 border-l border-border">
-                            <div className="text-right hidden sm:block">
-                                <div className="text-sm font-medium text-foreground">{session?.user?.name || "Trader"}</div>
-                                <div className="text-xs text-muted-foreground">{session?.user?.email}</div>
-                            </div>
-                            <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
-                                <User className="w-4 h-4 text-secondary-foreground" />
-                            </div>
-                            <form action={async () => {
-                                'use server';
-                                await signOut();
-                            }}>
-                                <button className="p-2 text-muted-foreground hover:text-destructive transition-colors" title="Sign Out">
-                                    <LogOut className="w-5 h-5" />
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            <Navbar user={session?.user} />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex justify-between items-center mb-8">

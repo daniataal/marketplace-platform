@@ -8,6 +8,12 @@ export const authConfig = {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
             const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
+            const isOnAdmin = nextUrl.pathname.startsWith("/admin");
+
+            if (isOnAdmin) {
+                if (isLoggedIn && auth?.user?.role === 'ADMIN') return true;
+                return false; // Redirect to login if not admin
+            }
 
             // For now, let's protect the dashboard and settings
             if (isOnDashboard) {
@@ -22,14 +28,18 @@ export const authConfig = {
             return true;
         },
         async session({ session, token }) {
-            if (session.user && token.sub) {
+            if (token.sub && session.user) {
                 session.user.id = token.sub;
+            }
+            if (token.role && session.user) {
+                session.user.role = token.role as string;
             }
             return session;
         },
         async jwt({ token, user }) {
             if (user) {
                 token.sub = user.id;
+                token.role = user.role;
             }
             return token;
         }

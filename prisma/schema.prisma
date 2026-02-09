@@ -17,6 +17,8 @@ model Deal {
   discount      Float
   status        String   @default("OPEN") // OPEN, CLOSED, EXPORTED
   crowdfundingId String?
+  buyerId       String?
+  buyer         User?    @relation(fields: [buyerId], references: [id])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -27,6 +29,7 @@ model User {
   email         String    @unique
   password      String
   role          String    @default("USER") // USER, ADMIN
+  deals         Deal[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
