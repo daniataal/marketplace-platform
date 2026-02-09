@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Deal {
+  id            String   @id @default(uuid())
+  externalId    String   @unique
+  company       String
+  commodity     String
+  quantity      Float
+  pricePerKg    Float
+  discount      Float
+  status        String   @default("OPEN") // OPEN, CLOSED, EXPORTED
+  crowdfundingId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  role          String    @default("USER") // USER, ADMIN
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
