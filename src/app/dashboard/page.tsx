@@ -14,8 +14,14 @@ export default async function Dashboard() {
     });
 
     return (
-        <div className="min-h-screen bg-background">
-            <nav className="bg-card border-b border-border shadow-sm">
+        <div className="min-h-screen bg-background relative overflow-hidden">
+            {/* Ambient Lighting Engine */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-accent/5 via-background/0 to-background/0 pointer-events-none z-0" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/20 rounded-full blur-[120px] pointer-events-none z-0 opacity-40 mix-blend-screen" />
+            <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-accent/20 rounded-full blur-[100px] pointer-events-none z-0 mix-blend-screen" />
+            <div className="absolute bottom-[10%] left-[10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] pointer-events-none z-0" />
+
+            <nav className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Link href="/" className="flex items-center gap-2">

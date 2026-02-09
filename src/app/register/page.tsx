@@ -1,10 +1,10 @@
 'use client';
 
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
 import { register } from '@/lib/actions';
 
 export default function RegisterPage() {
-    const [errorMessage, dispatch] = useFormState(register, undefined);
+    const [errorMessage, dispatch] = useActionState(register, undefined);
 
     return (
         <main className="flex items-center justify-center md:h-screen bg-background">

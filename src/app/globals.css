@@ -27,7 +27,37 @@
 
 /* Luxury Fintech Theme - FxPro Style */
 /* Deep blacks, coral red accents, gold metallic highlights */
+/* Luxury Fintech Theme - FxPro Style */
+/* Deep blacks, coral red accents, gold metallic highlights */
 :root {
+  --background: 240 10% 9%;
+  /* Neutral Luxury Dark (Charcoal) - No Blue Tint */
+  --foreground: 0 0% 98%;
+  --card: 240 10% 12%;
+  /* Slightly lighter charcoal */
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 4 90% 65%;
+  /* Vivid Coral Red */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 5% 18%;
+  /* Neutral Grey */
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 5% 18%;
+  --muted-foreground: 240 5% 70%;
+  --accent: 45 90% 60%;
+  /* Vivid Gold */
+  --accent-foreground: 240 10% 10%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 5% 20%;
+  --input: 240 5% 20%;
+  --ring: 4 90% 65%;
+  --radius: 0.625rem;
+}
+
+.light {
   --background: 0 0% 97%;
   --foreground: 0 0% 10%;
   --card: 0 0% 99%;
@@ -46,29 +76,6 @@
   --destructive-foreground: 0 0% 98%;
   --border: 0 0% 88%;
   --input: 0 0% 88%;
-  --ring: 4 74% 60%;
-  --radius: 0.625rem;
-}
-
-.dark {
-  --background: 0 0% 4%;
-  --foreground: 0 0% 95%;
-  --card: 0 0% 7%;
-  --card-foreground: 0 0% 95%;
-  --popover: 0 0% 6%;
-  --popover-foreground: 0 0% 95%;
-  --primary: 4 74% 60%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 0 0% 12%;
-  --secondary-foreground: 0 0% 95%;
-  --muted: 0 0% 10%;
-  --muted-foreground: 0 0% 55%;
-  --accent: 40 55% 55%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 60% 50%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 15%;
-  --input: 0 0% 15%;
   --ring: 4 74% 60%;
 }
 
