@@ -2,65 +2,84 @@
 
 import { useActionState } from 'react';
 import { register } from '@/lib/actions';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 export default function RegisterPage() {
     const [errorMessage, dispatch] = useActionState(register, undefined);
 
     return (
-        <main className="flex items-center justify-center md:h-screen bg-background">
-            <div className="relative mx-auto flex w-full max-w-[400px] flex-col space-y-2.5 p-4 md:-mt-32">
-                <div className="flex w-full items-end rounded-lg bg-primary p-3 md:h-36">
-                    <div className="w-32 text-white md:w-36 font-bold text-xl">
-                        Register
+        <main className="min-h-screen bg-background relative overflow-hidden flex items-center justify-center">
+            {/* Ambient Lighting Engine */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-accent/5 via-background/0 to-background/0 pointer-events-none z-0" />
+            <div className="absolute top-0 right-1/4 w-[1000px] h-[600px] bg-primary/20 rounded-full blur-[120px] pointer-events-none z-0 opacity-40 mix-blend-screen" />
+            <div className="absolute bottom-0 left-1/4 w-[800px] h-[600px] bg-accent/10 rounded-full blur-[120px] pointer-events-none z-0 mix-blend-screen" />
+
+            <div className="relative z-10 w-full max-w-md px-4">
+                <Link
+                    href="/login"
+                    className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+                >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Login
+                </Link>
+
+                <div className="bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8">
+                    <div className="text-center mb-8">
+                        <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-xl mb-4 shadow-lg shadow-primary/20">
+                            <span className="text-white font-bold text-xl">M</span>
+                        </div>
+                        <h1 className="text-2xl font-bold text-foreground">Create Account</h1>
+                        <p className="text-muted-foreground mt-2 text-sm">Join the exclusive marketplace</p>
                     </div>
-                </div>
-                <form action={dispatch} className="space-y-3">
-                    <div className="flex-1 rounded-lg bg-card border border-border px-6 pb-4 pt-8 shadow-sm">
-                        <h1 className="mb-3 text-2xl font-bold text-foreground">
-                            Create an account
-                        </h1>
-                        <div className="w-full">
-                            <div>
-                                <label
-                                    className="mb-3 mt-5 block text-xs font-medium text-muted-foreground"
-                                    htmlFor="name"
-                                >
-                                    Name
-                                </label>
+
+                    <form action={dispatch} className="space-y-4">
+                        <div>
+                            <label
+                                className="block text-sm font-medium text-foreground mb-1.5"
+                                htmlFor="name"
+                            >
+                                Full Name
+                            </label>
+                            <div className="relative">
                                 <input
-                                    className="peer block w-full rounded-md border border-input bg-background py-[9px] pl-3 text-sm outline-none focus:ring-1 focus:ring-primary text-foreground"
+                                    className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                                     id="name"
                                     type="text"
                                     name="name"
-                                    placeholder="Enter your name"
+                                    placeholder="John Doe"
                                     required
                                 />
                             </div>
-                            <div className="mt-4">
-                                <label
-                                    className="mb-3 mt-5 block text-xs font-medium text-muted-foreground"
-                                    htmlFor="email"
-                                >
-                                    Email
-                                </label>
+                        </div>
+                        <div>
+                            <label
+                                className="block text-sm font-medium text-foreground mb-1.5"
+                                htmlFor="email"
+                            >
+                                Email Address
+                            </label>
+                            <div className="relative">
                                 <input
-                                    className="peer block w-full rounded-md border border-input bg-background py-[9px] pl-3 text-sm outline-none focus:ring-1 focus:ring-primary text-foreground"
+                                    className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                                     id="email"
                                     type="email"
                                     name="email"
-                                    placeholder="Enter your email address"
+                                    placeholder="name@example.com"
                                     required
                                 />
                             </div>
-                            <div className="mt-4">
-                                <label
-                                    className="mb-3 mt-5 block text-xs font-medium text-muted-foreground"
-                                    htmlFor="password"
-                                >
-                                    Password
-                                </label>
+                        </div>
+                        <div>
+                            <label
+                                className="block text-sm font-medium text-foreground mb-1.5"
+                                htmlFor="password"
+                            >
+                                Password
+                            </label>
+                            <div className="relative">
                                 <input
-                                    className="peer block w-full rounded-md border border-input bg-background py-[9px] pl-3 text-sm outline-none focus:ring-1 focus:ring-primary text-foreground"
+                                    className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                                     id="password"
                                     type="password"
                                     name="password"
@@ -70,20 +89,22 @@ export default function RegisterPage() {
                                 />
                             </div>
                         </div>
+
                         <div
-                            className="flex h-8 items-end space-x-1"
+                            className="flex items-center min-h-[24px]"
                             aria-live="polite"
                             aria-atomic="true"
                         >
                             {errorMessage && (
-                                <p className="text-sm text-destructive">{errorMessage}</p>
+                                <p className="text-sm text-destructive font-medium">{errorMessage}</p>
                             )}
                         </div>
-                        <button className="mt-4 w-full bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary/90 transition-colors font-medium">
+
+                        <button className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-medium py-2.5 rounded-lg shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
                             Create Account
                         </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </main>
     );

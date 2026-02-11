@@ -7,69 +7,63 @@ export default function LoginForm() {
     const [errorMessage, dispatch] = useActionState(authenticate, undefined);
 
     return (
-        <form action={dispatch} className="space-y-3">
-            <div className="flex-1 rounded-lg bg-white px-6 pb-4 pt-8">
-                <h1 className="mb-3 text-2xl font-bold text-gray-900">
-                    Please log in to continue.
-                </h1>
-                <div className="w-full">
-                    <div>
-                        <label
-                            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
-                            htmlFor="email"
-                        >
-                            Email
-                        </label>
-                        <div className="relative">
-                            <input
-                                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
-                                id="email"
-                                type="email"
-                                name="email"
-                                placeholder="Enter your email address"
-                                required
-                            />
-                        </div>
-                    </div>
-                    <div className="mt-4">
-                        <label
-                            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
-                            htmlFor="password"
-                        >
-                            Password
-                        </label>
-                        <div className="relative">
-                            <input
-                                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
-                                id="password"
-                                type="password"
-                                name="password"
-                                placeholder="Enter password"
-                                required
-                                minLength={6}
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div
-                    className="flex h-8 items-end space-x-1"
-                    aria-live="polite"
-                    aria-atomic="true"
+        <form action={dispatch} className="space-y-4">
+            <div>
+                <label
+                    className="block text-sm font-medium text-foreground mb-1.5"
+                    htmlFor="email"
                 >
-                    {errorMessage && (
-                        <p className="text-sm text-red-500">{errorMessage}</p>
-                    )}
+                    Email Address
+                </label>
+                <div className="relative">
+                    <input
+                        className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                        id="email"
+                        type="email"
+                        name="email"
+                        placeholder="name@example.com"
+                        required
+                    />
                 </div>
-                <LoginButton />
             </div>
+            <div>
+                <label
+                    className="block text-sm font-medium text-foreground mb-1.5"
+                    htmlFor="password"
+                >
+                    Password
+                </label>
+                <div className="relative">
+                    <input
+                        className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                        id="password"
+                        type="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        required
+                        minLength={6}
+                    />
+                </div>
+            </div>
+
+            <div
+                className="flex items-center min-h-[24px]"
+                aria-live="polite"
+                aria-atomic="true"
+            >
+                {errorMessage && (
+                    <p className="text-sm text-destructive font-medium">{errorMessage}</p>
+                )}
+            </div>
+            <LoginButton />
         </form>
     );
 }
 
 function LoginButton() {
     return (
-        <button className="mt-4 w-full bg-indigo-600 text-white p-2 rounded-md hover:bg-indigo-500">
-            Log in
+        <button className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-medium py-2.5 rounded-lg shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+            Sign In
         </button>
     );
 }
