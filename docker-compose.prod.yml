@@ -39,7 +39,7 @@ services:
       postgres:
         condition: service_healthy
     # Run migrations on start (using db push for schema sync without migrations)
-    command: sh -c "npx prisma db push --skip-generate && node server.js"
+    command: sh -c "npx prisma db push && node server.js"
 
 
   caddy:
