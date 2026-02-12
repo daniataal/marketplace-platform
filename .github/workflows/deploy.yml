@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+    
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -96,3 +96,4 @@ jobs:
             
             # Clean up unused images
             sudo docker image prune -f
+
