@@ -15,6 +15,10 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
 # Disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED 1
 
@@ -23,9 +27,11 @@ RUN npx prisma generate
 
 RUN npm run build
 
-# Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
+
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
 
 ENV NODE_ENV production
 # Disable telemetry during runtime.
