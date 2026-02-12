@@ -81,6 +81,7 @@ jobs:
             AUTH_SECRET=${{ secrets.AUTH_SECRET }}
             NEXTAUTH_SECRET=${{ secrets.AUTH_SECRET }}
             NEXTAUTH_URL=http://${{ secrets.SSH_HOST }}:3001
+            CROWDFUNDING_API_URL=http://${{ secrets.SSH_HOST }}:3000/api/marketplace/commodities
             POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             NODE_ENV=production
             AUTH_TRUST_HOST=true
