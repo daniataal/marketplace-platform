@@ -14,6 +14,12 @@ export async function POST(
 
         const params = await props.params;
         const dealId = params.id;
+        const body = await request.json();
+        const { quantity, deliveryLocation } = body;
+
+        if (!quantity || quantity <= 0) {
+            return NextResponse.json({ error: "Invalid quantity" }, { status: 400 });
+        }
 
         // 1. Verify Deal exists and is OPEN
         const deal = await prisma.deal.findUnique({
@@ -28,95 +34,120 @@ export async function POST(
             return NextResponse.json({ error: "Deal is not available" }, { status: 400 });
         }
 
-        // 2. Update Status to CLOSED locally and assign to buyer
-        const updatedDeal = await prisma.deal.update({
-            where: { id: dealId },
-            data: {
-                status: "CLOSED",
-                buyerId: session.user.id
-            }
-        });
-
-        // 3. Export to Crowdfunding
-        // We need the Crowdfunding API URL. For now, let's assume localhost:3000 (standard Next.js port)
-        // But wait, Marketplace is probably 3001 or something.
-        // Let's assume Crowdfunding is running on http://localhost:3000 (default) and Marketplace on 3001.
-
-        const CROWDFUNDING_API = process.env.CROWDFUNDING_API_URL || "http://localhost:3000/api/marketplace/commodities";
-        console.log(`[Marketplace] Exporting deal ${dealId} to ${CROWDFUNDING_API}`);
-
-        try {
-            const exportPayload = {
-                // Map to CrowdFunding Commodity Schema
-                type: "Metals", // Defaulting for now since we don't have exact mapping
-                name: `${updatedDeal.company} - ${updatedDeal.commodity}`,
-                icon: "gold-bar", // specific to gold, or map based on commodity
-                risk: "Low",
-                targetApy: 12.5, // Mock default
-                duration: 12,
-                minInvestment: 500,
-                amountRequired: updatedDeal.quantity * updatedDeal.pricePerKg * (1 - updatedDeal.discount / 100),
-                description: `Secured ${updatedDeal.commodity} deal from ${updatedDeal.company}. Quantity: ${updatedDeal.quantity}kg.`,
-                origin: "Africa", // We don't have country in Deal model yet! We should probably add it.
-                destination: "Dubai",
-                transportMethod: "Air Freight",
-                metalForm: "Bar",
-                purityPercent: 99.9,
-                // Passing external Marketplace ID reference
-                shipmentId: updatedDeal.id
-            };
-
-            console.log("[Marketplace] Payload:", JSON.stringify(exportPayload, null, 2));
-
-            const response = await fetch(CROWDFUNDING_API, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(exportPayload)
-            });
-
-            const responseText = await response.text();
-            console.log(`[Marketplace] Response Status: ${response.status}`);
-            console.log(`[Marketplace] Response Body: ${responseText}`);
-
-            if (!response.ok) {
-                console.error("Failed to export to Crowdfunding", responseText);
-                await prisma.deal.update({
-                    where: { id: dealId },
-                    data: { status: "EXPORT_FAILED" }
-                });
-                return NextResponse.json({
-                    success: false,
-                    error: "Export rejected by Crowdfunding Service",
-                    details: responseText
-                }, { status: 500 });
-            } else {
-                const result = JSON.parse(responseText);
-                // Maybe save the crowdfunding ID?
-                // await prisma.deal.update({ where: { id: dealId }, data: { crowdfundingId: result.data.id } });
-                return NextResponse.json({ success: true, deal: updatedDeal, crowdfundingData: result.data });
-            }
-
-        } catch (err: any) {
-            console.error("Error calling Crowdfunding API:", err.message);
-            // Mark as FAILED export so we can retry or debug
-            await prisma.deal.update({
-                where: { id: dealId },
-                data: { status: "EXPORT_FAILED" }
-            });
+        // 2. Check available quantity
+        if (quantity > deal.availableQuantity) {
             return NextResponse.json({
-                success: false,
-                error: "Deal closed but failed to export to Crowdfunding. Status set to EXPORT_FAILED.",
-                details: err.message
-            }, { status: 500 });
+                error: `Only ${deal.availableQuantity} kg available`
+            }, { status: 400 });
         }
 
-        // Check if export was successful (response.ok was checked above but let's be sure)
-        // If we reached here, it means we didn't throw in catch block, 
-        // BUT we might have hit the !response.ok block which logged error but continued.
-        // We need to change the logic to return error if !response.ok.
+        // 3. Calculate cost
+        const finalPrice = deal.pricePerKg * (1 - deal.discount / 100);
+        const totalCost = quantity * finalPrice;
 
-        // Refactoring previous block to correctly handle control flow:
-        // (See applied changes below)
+        // 4. Check user balance
+        const buyer = await prisma.user.findUnique({
+            where: { id: session.user.id }
+        });
+
+        if (!buyer || buyer.balance < totalCost) {
+            return NextResponse.json({
+                error: "Insufficient balance"
+            }, { status: 400 });
+        }
+
+        // 5. Create Purchase record and update deal/user in a transaction
+        const result = await prisma.$transaction(async (tx) => {
+            // Deduct from user balance
+            await tx.user.update({
+                where: { id: session.user.id },
+                data: { balance: { decrement: totalCost } }
+            });
+
+            // Create Purchase record
+            const purchase = await tx.purchase.create({
+                data: {
+                    dealId: deal.id,
+                    buyerId: session.user.id,
+                    quantity,
+                    pricePerKg: finalPrice,
+                    totalPrice: totalCost,
+                    deliveryLocation: deliveryLocation || deal.deliveryLocation,
+                    status: "CONFIRMED"
+                }
+            });
+
+            // Update deal's available quantity
+            const updatedDeal = await tx.deal.update({
+                where: { id: dealId },
+                data: {
+                    availableQuantity: { decrement: quantity }
+                }
+            });
+
+            // If deal is now fully sold, update status to CLOSED
+            if (updatedDeal.availableQuantity <= 0) {
+                await tx.deal.update({
+                    where: { id: dealId },
+                    data: {
+                        status: "CLOSED",
+                        buyerId: session.user.id // Last buyer becomes the deal owner
+                    }
+                });
+            }
+
+            return { purchase, updatedDeal, soldOut: updatedDeal.availableQuantity <= 0 };
+        });
+
+        // 6. Export to Crowdfunding ONLY if deal is fully closed
+        let exportSuccess = false;
+        if (result.soldOut) {
+            const CROWDFUNDING_API = process.env.CROWDFUNDING_API_URL || "http://localhost:3000/api/marketplace/commodities";
+            console.log(`[Marketplace] Deal ${dealId} sold out. Exporting to ${CROWDFUNDING_API}`);
+
+            try {
+                const exportPayload = {
+                    type: "Metals",
+                    name: `${deal.company} - ${deal.commodity}`,
+                    icon: "gold-bar",
+                    risk: "Low",
+                    targetApy: 12.5,
+                    duration: 12,
+                    minInvestment: 500,
+                    amountRequired: deal.quantity * finalPrice,
+                    description: `Secured ${deal.commodity} deal from ${deal.company}. Total quantity: ${deal.quantity}kg.`,
+                    origin: "Africa",
+                    destination: deliveryLocation || deal.deliveryLocation,
+                    transportMethod: "Air Freight",
+                    metalForm: "Bar",
+                    purityPercent: 99.9,
+                    shipmentId: deal.id
+                };
+
+                const response = await fetch(CROWDFUNDING_API, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(exportPayload)
+                });
+
+                if (response.ok) {
+                    exportSuccess = true;
+                    console.log(`[Marketplace] Successfully exported deal ${dealId} to Crowdfunding`);
+                } else {
+                    console.error(`[Marketplace] Crowdfunding export failed:`, await response.text());
+                }
+            } catch (err: any) {
+                console.error(`[Marketplace] Crowdfunding export error:`, err.message);
+            }
+        }
+
+        return NextResponse.json({
+            success: true,
+            purchase: result.purchase,
+            availableQuantity: result.updatedDeal.availableQuantity,
+            soldOut: result.soldOut,
+            exportedToCrowdfunding: exportSuccess
+        });
 
     } catch (error) {
         console.error("Purchase error:", error);

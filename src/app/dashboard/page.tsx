@@ -60,7 +60,7 @@ export default async function Dashboard() {
                             </div>
                         ) : (
                             deals.map((deal) => (
-                                <ClientBuyButton key={deal.id} deal={deal} />
+                                <ClientBuyButton key={deal.id} deal={deal} userBalance={walletData.balance} />
                             ))
                         )}
                     </div>

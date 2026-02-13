@@ -28,22 +28,23 @@ export async function POST(request: NextRequest) {
                 company,
                 commodity,
                 quantity: parseFloat(quantity),
+                availableQuantity: parseFloat(quantity), // Reset available quantity on update
                 pricePerKg: parseFloat(pricePerKg),
                 discount: parseFloat(discount),
-                // If it was previously CLOSED/EXPORTED, we might decide NOT to update status
-                // For now, let's keep status as is if it exists, or update if needed.
-                // But usually Mining Map sends updates. Let's assume updates from Mining Map
-                // should re-open or update details. 
-                // For simplicity: just update fields.
+                deliveryLocation: "Dubai", // Default from mining exports
+                incoterms: "CIF"
             },
             create: {
                 externalId,
                 company,
                 commodity,
                 quantity: parseFloat(quantity),
+                availableQuantity: parseFloat(quantity), // Initialize with full quantity
                 pricePerKg: parseFloat(pricePerKg),
                 discount: parseFloat(discount),
-                status: "OPEN"
+                status: "OPEN",
+                deliveryLocation: "Dubai", // Default for mining exports
+                incoterms: "CIF" // Cost, Insurance, and Freight
             }
         });
 

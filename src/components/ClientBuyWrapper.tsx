@@ -1,31 +1,51 @@
 'use client';
 
 import { DealCard } from "./DealCard";
+import { PurchaseModal } from "./PurchaseModal";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-export default function ClientBuyButton({ deal }: { deal: any }) {
+export default function ClientBuyButton({ deal, userBalance }: { deal: any; userBalance: number }) {
     const router = useRouter();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedDeal, setSelectedDeal] = useState<any>(null);
 
-    const handleBuy = async (id: string) => {
-        // Optimistic update or loading state could go here
-        if (!confirm("Are you sure you want to purchase this deal and send it to Crowdfunding?")) return;
-
-        try {
-            const res = await fetch(`/api/v1/deals/${id}/purchase`, {
-                method: 'POST'
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                alert("Deal Purchased & Exported to Crowdfunding!");
-                router.refresh();
-            } else {
-                alert("Error: " + data.error);
-            }
-        } catch (e) {
-            alert("Error processing purchase");
-        }
+    const handleBuyClick = (deal: any) => {
+        setSelectedDeal(deal);
+        setIsModalOpen(true);
     };
 
-    return <DealCard deal={deal} onBuy={handleBuy} />;
+    const handlePurchase = async (quantity: number, deliveryLocation: string) => {
+        if (!selectedDeal) return;
+
+        const res = await fetch(`/api/v1/deals/${selectedDeal.id}/purchase`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ quantity, deliveryLocation })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || 'Purchase failed');
+        }
+
+        // Success - refresh the page to show updated availability
+        router.refresh();
+    };
+
+    return (
+        <>
+            <DealCard deal={deal} onBuy={handleBuyClick} />
+            {selectedDeal && (
+                <PurchaseModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    deal={selectedDeal}
+                    userBalance={userBalance}
+                    onPurchase={handlePurchase}
+                />
+            )}
+        </>
+    );
 }

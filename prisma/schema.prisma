@@ -8,20 +8,24 @@ datasource db {
 }
 
 model Deal {
-  id            String   @id @default(uuid())
-  externalId    String   @unique
-  company       String
-  commodity     String
-  quantity      Float
-  pricePerKg    Float
-  discount      Float
-  status        String   @default("OPEN") // OPEN, CLOSED, EXPORTED
-  crowdfundingId String?
-  buyerId       String?
-  buyer         User?    @relation(fields: [buyerId], references: [id])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  agreement     Agreement?
+  id                String      @id @default(uuid())
+  externalId        String      @unique
+  company           String
+  commodity         String
+  quantity          Float
+  availableQuantity Float       @default(0) @map("available_quantity")
+  pricePerKg        Float
+  discount          Float
+  status            String      @default("OPEN") // OPEN, CLOSED, EXPORTED
+  deliveryLocation  String      @default("Dubai")
+  incoterms         String      @default("CIF") // CIF, FOB, EXW, etc.
+  crowdfundingId    String?
+  buyerId           String?
+  buyer             User?       @relation("DealBuyer", fields: [buyerId], references: [id])
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  agreement         Agreement?
+  purchases         Purchase[]
 }
 
 model User {
@@ -31,7 +35,8 @@ model User {
   password      String
   role          String    @default("USER") // USER, ADMIN
   balance       Float     @default(0)
-  deals         Deal[]
+  deals         Deal[]    @relation("DealBuyer")
+  purchases     Purchase[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
@@ -43,6 +48,25 @@ model User {
   passportNumber String?
   nationality   String?
   kycDocuments  Json?     // Store URLs or metadata for uploaded docs
+}
+
+model Purchase {
+  id               String   @id @default(uuid())
+  dealId           String
+  buyerId          String
+  quantity         Float
+  pricePerKg       Float
+  totalPrice       Float
+  deliveryLocation String
+  status           String   @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  deal             Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  buyer            User     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  
+  @@index([dealId])
+  @@index([buyerId])
 }
 
 model Agreement {

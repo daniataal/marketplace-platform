@@ -1,5 +1,5 @@
 import React from 'react';
-import { Share2, ShoppingCart } from 'lucide-react';
+import { Share2, ShoppingCart, MapPin, FileText } from 'lucide-react';
 
 interface DealProps {
     deal: {
@@ -7,15 +7,19 @@ interface DealProps {
         company: string;
         commodity: string;
         quantity: number;
+        availableQuantity: number;
         pricePerKg: number;
         discount: number;
         status: string;
+        deliveryLocation: string;
+        incoterms: string;
     };
-    onBuy: (id: string) => void;
+    onBuy: (deal: any) => void;
 }
 
 export function DealCard({ deal, onBuy }: DealProps) {
     const finalPrice = deal.pricePerKg * (1 - deal.discount / 100);
+    const availabilityPercent = (deal.availableQuantity / deal.quantity) * 100;
 
     return (
         <div className="group relative rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1">
@@ -44,25 +48,51 @@ export function DealCard({ deal, onBuy }: DealProps) {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                        <div className="p-3 bg-secondary/30 rounded-lg border border-white/5">
-                            <span className="block text-xs text-muted-foreground uppercase tracking-wider mb-1">Quantity</span>
-                            <span className="font-mono text-lg text-foreground">{deal.quantity} <span className="text-sm text-muted-foreground">kg</span></span>
+                    {/* Availability Bar */}
+                    <div className="mb-4">
+                        <div className="flex justify-between text-xs text-muted-foreground mb-2">
+                            <span>Available: {deal.availableQuantity} kg / {deal.quantity} kg</span>
+                            <span>{availabilityPercent.toFixed(0)}%</span>
                         </div>
+                        <div className="w-full h-2 bg-secondary/50 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-500"
+                                style={{ width: `${availabilityPercent}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 mb-4">
                         <div className="p-3 bg-secondary/30 rounded-lg border border-white/5">
                             <span className="block text-xs text-muted-foreground uppercase tracking-wider mb-1">Total Value</span>
                             <span className="font-mono text-lg text-foreground">${(deal.quantity * finalPrice).toLocaleString()}</span>
+                        </div>
+                        <div className="p-3 bg-secondary/30 rounded-lg border border-white/5">
+                            <span className="block text-xs text-muted-foreground uppercase tracking-wider mb-1">Per kg</span>
+                            <span className="font-mono text-lg text-foreground">${finalPrice.toLocaleString()}</span>
+                        </div>
+                    </div>
+
+                    {/* Delivery & Incoterms */}
+                    <div className="flex gap-2 mb-6">
+                        <div className="flex items-center gap-1 px-2 py-1 bg-secondary/50 rounded text-xs text-muted-foreground">
+                            <MapPin className="w-3 h-3" />
+                            {deal.deliveryLocation}
+                        </div>
+                        <div className="flex items-center gap-1 px-2 py-1 bg-secondary/50 rounded text-xs text-muted-foreground">
+                            <FileText className="w-3 h-3" />
+                            {deal.incoterms}
                         </div>
                     </div>
 
                     <div className="flex gap-3 mt-auto">
                         <button
-                            onClick={() => onBuy(deal.id)}
-                            disabled={deal.status !== 'OPEN'}
+                            onClick={() => onBuy(deal)}
+                            disabled={deal.status !== 'OPEN' || deal.availableQuantity === 0}
                             className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary/80 hover:to-primary text-white py-3 px-4 rounded-lg font-bold transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                         >
                             <ShoppingCart className="w-4 h-4" />
-                            {deal.status === 'OPEN' ? 'Purchase Deal' : deal.status}
+                            {deal.availableQuantity === 0 ? 'Sold Out' : deal.status === 'OPEN' ? 'Purchase Deal' : deal.status}
                         </button>
                     </div>
                 </div>
