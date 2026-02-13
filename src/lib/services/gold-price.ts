@@ -1,4 +1,4 @@
-import axios from 'axios';
+// Using native fetch instead of axios for better DNS resolution in Next.js
 
 export class GoldPriceService {
     // Call duration in ms
@@ -22,22 +22,21 @@ export class GoldPriceService {
         }
 
         try {
-            console.log("Fetching live gold price from API via Axios...");
+            console.log("Fetching live gold price from API via native fetch...");
 
-            // Use axios to bypass Next.js native fetch caching quirks
-            const response = await axios.get('https://api.gold-api.com/price/XAU', {
+            // Use native fetch - more reliable DNS resolution in Next.js than axios
+            const response = await fetch('https://api.gold-api.com/price/XAU', {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (compatible; GoldTracker/1.0)',
                     'Accept': 'application/json',
                     'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
                 },
-                timeout: 5000 // 5s timeout
+                signal: AbortSignal.timeout(5000), // 5s timeout
+                cache: 'no-store' // Disable Next.js caching
             });
 
-            if (response.status === 200 && response.data) {
-                const data = response.data;
+            if (response.ok) {
+                const data = await response.json();
                 if (data.price) {
                     const pricePerOunce = Number(data.price);
 
@@ -52,16 +51,13 @@ export class GoldPriceService {
                     return pricePerKg;
                 }
             }
-            throw new Error("Invalid API response format");
+            throw new Error(`API returned status ${response.status}`);
+
 
         } catch (error) {
             // Use fallback price when API is unreachable
             console.warn("⚠️ Gold API unreachable, using fallback price");
-            if (axios.isAxiosError(error)) {
-                console.error(`Gold API Error: ${error.message}`, error.code);
-            } else {
-                console.error("Failed to fetch gold price:", error);
-            }
+            console.error(`Gold API Error:`, error instanceof Error ? error.message : error);
 
             // Return cached price if available, otherwise use fallback
             if (this.cachedPrice > 0) {
