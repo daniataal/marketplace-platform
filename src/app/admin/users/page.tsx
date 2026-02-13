@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { User, DollarSign, Shield, CheckCircle, XCircle } from "lucide-react";
 import { revalidatePath } from "next/cache";
+import Link from "next/link";
 import { UserActions } from "@/components/admin/UserActions"; // Import
 
 export const dynamic = 'force-dynamic';
@@ -92,11 +93,20 @@ export default async function AdminUsersPage() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <UserActions
-                                            userId={user.id}
-                                            currentRole={user.role}
-                                            userName={user.name || 'User'}
-                                        />
+                                        <div className="flex items-center justify-end gap-3">
+                                            <Link
+                                                href={`/admin/users/${user.id}`}
+                                                className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+                                            >
+                                                View Profile
+                                            </Link>
+                                            <div className="h-4 w-px bg-border/50"></div>
+                                            <UserActions
+                                                userId={user.id}
+                                                currentRole={user.role}
+                                                userName={user.name || 'User'}
+                                            />
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

@@ -324,3 +324,53 @@ export async function adminAdjustBalance(userId: string, amount: number, reason:
         throw new Error("Failed to adjust balance");
     }
 }
+
+export async function updateKycStatus(userId: string, status: 'PENDING' | 'APPROVED' | 'REJECTED') {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+        throw new Error("Unauthorized");
+    }
+
+    try {
+        await prisma.user.update({
+            where: { id: userId },
+            data: { kycStatus: status }
+        });
+        revalidatePath(`/admin/users`);
+        revalidatePath(`/admin/users/${userId}`);
+    } catch (error) {
+        console.error("KYC update error:", error);
+        throw new Error("Failed to update KYC status");
+    }
+}
+
+export async function getUserDetails(userId: string) {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+        throw new Error("Unauthorized");
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+            transactions: {
+                orderBy: { createdAt: 'desc' }
+            },
+            purchases: {
+                include: {
+                    deal: true
+                },
+                orderBy: { createdAt: 'desc' }
+            },
+            _count: {
+                select: { deals: true }
+            }
+        }
+    });
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    return user;
+}
