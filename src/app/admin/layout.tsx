@@ -36,6 +36,13 @@ export default function AdminLayout({
                         Create Deal
                     </Link>
                     <Link
+                        href="/admin/users"
+                        className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:bg-secondary/50 hover:text-foreground rounded-lg transition-colors"
+                    >
+                        <LayoutDashboard className="w-5 h-5" />
+                        Manage Users
+                    </Link>
+                    <Link
                         href="/settings"
                         className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:bg-secondary/50 hover:text-foreground rounded-lg transition-colors"
                     >

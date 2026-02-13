@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { DeleteDealButton } from "@/components/admin/DeleteDealButton";
+import { PlusCircle, Pencil } from "lucide-react";
 import { Deal } from "@prisma/client";
 
 export const dynamic = 'force-dynamic';
@@ -58,9 +59,16 @@ export default async function AdminDashboard() {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <button className="text-muted-foreground hover:text-destructive transition-colors">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                    <div className="flex items-center justify-end gap-2">
+                                        <Link
+                                            href={`/admin/deals/${deal.id}/edit`}
+                                            className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
+                                            title="Edit Deal"
+                                        >
+                                            <Pencil className="w-4 h-4" />
+                                        </Link>
+                                        <DeleteDealButton id={deal.id} title={deal.company} hasPurchases={false} />
+                                    </div>
                                 </td>
                             </tr>
                         ))}

@@ -201,6 +201,7 @@ export async function deleteDeal(id: string) {
             where: { id },
         });
         revalidatePath("/admin");
+        revalidatePath("/admin/deals");
         revalidatePath("/dashboard");
     } catch (error) {
         console.error("Delete deal error:", error);
