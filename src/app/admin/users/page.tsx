@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { User, DollarSign, Shield, CheckCircle, XCircle } from "lucide-react";
+import { User, DollarSign, Shield, CheckCircle, XCircle, UserPlus } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { UserActions } from "@/components/admin/UserActions"; // Import
@@ -25,6 +25,13 @@ export default async function AdminUsersPage() {
                     <h1 className="text-3xl font-bold text-foreground">Manage Users</h1>
                     <p className="text-muted-foreground mt-1">View user details, balances, and manage roles</p>
                 </div>
+                <Link
+                    href="/admin/users/create"
+                    className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                >
+                    <UserPlus className="w-4 h-4" />
+                    Create User
+                </Link>
             </div>
 
             <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">

@@ -2,6 +2,11 @@
 
 import { signIn, auth } from '@/auth';
 import { AuthError } from 'next-auth';
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { GoldPriceService } from "./services/gold-price";
 
 // Helper for UI to get current price
 export async function getLiveGoldPrice() {
@@ -27,10 +32,6 @@ export async function authenticate(
         throw error;
     }
 }
-
-import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
-import { redirect } from "next/navigation";
 
 export async function register(
     prevState: string | undefined,
@@ -113,8 +114,6 @@ export async function updateProfile(
     }
 }
 
-import { GoldPriceService } from "./services/gold-price";
-
 export async function createDeal(
     prevState: string | undefined,
     formData: FormData,
@@ -151,16 +150,8 @@ export async function createDeal(
         let initialPricePerKg = 0;
 
         if (pricingModel === 'FIXED') {
-            // For fixed pricing, we calculate it once and store it
-            // Or the user might assume "Price per Kg" input is manual. 
-            // BUT requirements say "calculate the price per kg...". 
-            // So we will calculate it based on current market + discount.
             initialPricePerKg = GoldPriceService.calculateDealPrice(currentMarketPrice, purity, discount);
         } else {
-            // For dynamic, we store the current price as a baseline/reference
-            // But the UI will recalculate it. Ideally dealing with "pricePerKg" in the DB.
-            // We'll store the current calculated price so sorting/filtering works, 
-            // but UI will override it.
             initialPricePerKg = GoldPriceService.calculateDealPrice(currentMarketPrice, purity, discount);
         }
 
@@ -187,8 +178,6 @@ export async function createDeal(
 
     redirect("/admin");
 }
-
-import { revalidatePath } from "next/cache";
 
 export async function deleteDeal(id: string) {
     const session = await auth();
@@ -240,10 +229,6 @@ export async function updateDeal(
     }
 
     try {
-        // Fetch current market price for reference just in case we need to update stored price
-        // For existing deals, we might want to keep the original market price OR update it if switched to FIXED
-        // For simplicity, let's just update the stored fields.
-
         const currentMarketPrice = await GoldPriceService.getLivePricePerKg();
         let pricePerKg = 0;
 
@@ -258,12 +243,6 @@ export async function updateDeal(
                 type,
                 pricingModel,
                 quantity,
-                // Note: availableQuantity logic is tricky. If quantity changed, how does it affect available?
-                // For now assuming Admin manages availableQuantity manually or resets it if quantity changes drastically?
-                // Let's NOT update availableQuantity automatically here to avoid overriding sales, 
-                // unless it was previously full and now we added more? 
-                // User requirement: "edit deals". 
-                // Let's start with basic fields.
                 purity,
                 discount,
                 pricePerKg: pricingModel === 'FIXED' ? pricePerKg : 0, // 0 or placeholder
@@ -374,4 +353,77 @@ export async function getUserDetails(userId: string) {
     }
 
     return user;
+}
+
+export async function adminCreateUser(
+    prevState: string | undefined,
+    formData: FormData,
+): Promise<string | undefined> {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+        return "Unauthorized";
+    }
+
+    const name = formData.get("name") as string;
+    const email = (formData.get("email") as string).toLowerCase();
+    const password = formData.get("password") as string;
+    const role = (formData.get("role") as string) || "USER";
+
+    if (!email || !password || password.length < 6) {
+        return "Invalid input data. Password must be at least 6 characters.";
+    }
+
+    try {
+        const existingUser = await prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (existingUser) {
+            return "User with this email already exists.";
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                role: role as 'USER' | 'ADMIN',
+                // Default settings for manually created users
+                kycStatus: 'PENDING'
+            },
+        });
+
+        revalidatePath("/admin/users");
+    } catch (error) {
+        console.error("Admin create user error:", error);
+        return "Failed to create user.";
+    }
+
+    redirect("/admin/users");
+}
+
+export async function adminResetPassword(userId: string, newPassword: string) {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+        throw new Error("Unauthorized");
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+        throw new Error("Password must be at least 6 characters long");
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: { password: hashedPassword }
+        });
+
+        revalidatePath("/admin/users");
+    } catch (error) {
+        throw new Error("Failed to reset password");
+    }
 }

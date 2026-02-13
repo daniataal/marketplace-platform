@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { updateUserRole, adminAdjustBalance } from '@/lib/actions';
-import { Settings, DollarSign, X, Check } from 'lucide-react';
+import { updateUserRole, adminAdjustBalance, adminResetPassword } from '@/lib/actions';
+import { Settings, DollarSign, X, Check, Lock } from 'lucide-react';
 
 interface UserActionsProps {
     userId: string;
@@ -12,6 +12,7 @@ interface UserActionsProps {
 
 export function UserActions({ userId, currentRole, userName }: UserActionsProps) {
     const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handleRoleChange = async (newRole: string) => {
@@ -48,9 +49,24 @@ export function UserActions({ userId, currentRole, userName }: UserActionsProps)
                 <DollarSign className="w-4 h-4" />
             </button>
 
+            <button
+                onClick={() => setIsPasswordModalOpen(true)}
+                className="p-1.5 text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition-colors"
+                title="Reset Password"
+            >
+                <Lock className="w-4 h-4" />
+            </button>
+
             <AdjustBalanceModal
                 isOpen={isBalanceModalOpen}
                 onClose={() => setIsBalanceModalOpen(false)}
+                userId={userId}
+                userName={userName}
+            />
+
+            <ResetPasswordModal
+                isOpen={isPasswordModalOpen}
+                onClose={() => setIsPasswordModalOpen(false)}
                 userId={userId}
                 userName={userName}
             />
@@ -129,6 +145,83 @@ function AdjustBalanceModal({ isOpen, onClose, userId, userName }: { isOpen: boo
                         {loading ? 'Processing...' : 'Confirm Adjustment'}
                     </button>
                 </form>
+            </div>
+        </div>
+    );
+}
+
+function ResetPasswordModal({ isOpen, onClose, userId, userName }: { isOpen: boolean; onClose: () => void; userId: string; userName: string }) {
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            await adminResetPassword(userId, password);
+            setSuccess(true);
+            setPassword('');
+            // Close after a brief delay or let user close
+            setTimeout(() => {
+                onClose();
+                setSuccess(false);
+            }, 2000);
+        } catch (error) {
+            alert("Failed to reset password");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-card border border-border rounded-xl shadow-xl w-full max-w-sm p-6">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-foreground">Reset Password</h3>
+                    <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
+
+                {success ? (
+                    <div className="text-center py-6 text-emerald-500">
+                        <Check className="w-12 h-12 mx-auto mb-2" />
+                        <p className="font-medium">Password Reset Successfully</p>
+                    </div>
+                ) : (
+                    <>
+                        <p className="text-sm text-muted-foreground mb-4">
+                            Set a new password for <span className="font-semibold text-foreground">{userName}</span>.
+                        </p>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-medium text-muted-foreground mb-1">New Password</label>
+                                <input
+                                    type="text" // Visible for admin to see what they are setting
+                                    minLength={6}
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full p-2 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none font-mono"
+                                    placeholder="Minimum 6 chars"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-2 bg-destructive text-destructive-foreground rounded-lg font-bold hover:bg-destructive/90 transition-colors disabled:opacity-50 text-sm"
+                            >
+                                {loading ? 'Resetting...' : 'Reset Password'}
+                            </button>
+                        </form>
+                    </>
+                )}
             </div>
         </div>
     );
