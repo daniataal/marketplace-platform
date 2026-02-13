@@ -29,6 +29,14 @@ services:
       - 8.8.8.8      # Google DNS
       - 8.8.4.4      # Google DNS secondary
       - 1.1.1.1      # Cloudflare DNS
+    dns_search: []   # Disable search domains to avoid DNS lookup delays
+    dns_opt:
+      - ndots:1      # Prevent unnecessary DNS search attempts
+      - timeout:2    # DNS timeout in seconds
+      - attempts:3   # Number of DNS query attempts
+    # Add static host entry to bypass broken Docker DNS on Oracle Cloud
+    extra_hosts:
+      - "api.gold-api.com:137.184.95.73"  # Gold API IP address
     environment:
       DATABASE_URL: postgresql://postgres:marketplace_password@postgres:5432/marketplace_db?schema=public
       # Secrets should be passed via .env file on the server
