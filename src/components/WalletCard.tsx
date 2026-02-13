@@ -1,6 +1,7 @@
 'use client';
 
 import { Wallet, TrendingUp, CreditCard } from "lucide-react";
+import { WalletActions } from "./WalletActions";
 
 interface WalletData {
     balance: number;
@@ -19,9 +20,10 @@ export function WalletCard({ initialData }: { initialData: WalletData }) {
             <div className="flex items-start justify-between mb-8 relative z-10">
                 <div>
                     <p className="text-sm font-medium text-muted-foreground mb-1">Total Net Worth</p>
-                    <h2 className="text-3xl font-bold text-foreground">
+                    <h2 className="text-3xl font-bold text-foreground mb-4">
                         ${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </h2>
+                    <WalletActions />
                 </div>
                 <div className="p-3 bg-primary/10 rounded-xl text-primary">
                     <Wallet className="w-6 h-6" />

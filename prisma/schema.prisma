@@ -52,6 +52,20 @@ model User {
   passportNumber String?
   nationality   String?
   kycDocuments  Json?     // Store URLs or metadata for uploaded docs
+  transactions  Transaction[]
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // DEPOSIT, WITHDRAWAL, PURCHASE, SALE
+  amount    Float
+  status    String   @default("COMPLETED") // PENDING, COMPLETED, FAILED
+  reference String?  // Bank Ref, Deal ID, etc.
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Purchase {
@@ -76,7 +90,7 @@ model Purchase {
 model Agreement {
   id            String   @id @default(uuid())
   dealId        String   @unique
-  deal          Deal     @relation(fields: [dealId], references: [id])
+  deal          Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
   buyerName     String
   sellerName    String
   agreementDate DateTime @default(now())

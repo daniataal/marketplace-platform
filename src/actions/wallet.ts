@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export async function getWalletData() {
     const session = await auth();
@@ -28,4 +29,87 @@ export async function getWalletData() {
         portfolioValue,
         dealsCount: user.deals.length
     };
+}
+
+export async function depositFunds(amount: number, reference: string = "Manual Deposit") {
+    const session = await auth();
+    if (!session?.user?.email) throw new Error("Unauthorized");
+
+    try {
+        await prisma.$transaction(async (tx) => {
+            // 1. Update User Balance
+            await tx.user.update({
+                where: { email: session.user.email! },
+                data: { balance: { increment: amount } }
+            });
+
+            // 2. Create Transaction Record
+            await tx.transaction.create({
+                data: {
+                    userId: session.user.id!,
+                    type: "DEPOSIT",
+                    amount: amount,
+                    status: "COMPLETED",
+                    reference: reference
+                }
+            });
+        });
+
+        revalidatePath("/dashboard");
+        return { success: true };
+    } catch (error) {
+        console.error("Deposit failed:", error);
+        throw new Error("Deposit failed");
+    }
+}
+
+export async function withdrawFunds(amount: number, iban: string) {
+    const session = await auth();
+    if (!session?.user?.email) throw new Error("Unauthorized");
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email }
+        });
+
+        if (!user || user.balance < amount) {
+            throw new Error("Insufficient funds");
+        }
+
+        await prisma.$transaction(async (tx) => {
+            // 1. Deduct User Balance
+            await tx.user.update({
+                where: { email: session.user.email! },
+                data: { balance: { decrement: amount } }
+            });
+
+            // 2. Create Transaction Record
+            await tx.transaction.create({
+                data: {
+                    userId: session.user.id!,
+                    type: "WITHDRAWAL",
+                    amount: amount,
+                    status: "PENDING", // Withdrawals often need approval
+                    reference: `IBAN: ${iban}`
+                }
+            });
+        });
+
+        revalidatePath("/dashboard");
+        return { success: true };
+    } catch (error: any) {
+        console.error("Withdrawal failed:", error);
+        throw new Error(error.message || "Withdrawal failed");
+    }
+}
+
+export async function getTransactions() {
+    const session = await auth();
+    if (!session?.user?.email) return [];
+
+    return await prisma.transaction.findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: 'desc' },
+        take: 10
+    });
 }

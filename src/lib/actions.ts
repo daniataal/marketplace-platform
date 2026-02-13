@@ -207,3 +207,120 @@ export async function deleteDeal(id: string) {
         throw new Error("Failed to delete deal");
     }
 }
+
+export async function updateDeal(
+    id: string,
+    prevState: string | undefined,
+    formData: FormData,
+): Promise<string | undefined> {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+        return "Unauthorized";
+    }
+
+    const company = formData.get("company") as string;
+    const commodity = formData.get("commodity") as string;
+    const type = formData.get("type") as string;
+    const pricingModel = formData.get("pricingModel") as string;
+    const quantity = parseFloat(formData.get("quantity") as string);
+    const discount = parseFloat(formData.get("discount") as string);
+
+    // Check if purity is manually provided, otherwise derive from type
+    let purity = 0.9999;
+    const purityInput = formData.get("purity");
+    if (purityInput) {
+        purity = parseFloat(purityInput as string);
+    } else {
+        purity = GoldPriceService.getPurity(type);
+    }
+
+    if (!company || !commodity || isNaN(quantity) || isNaN(discount)) {
+        return "Invalid input data";
+    }
+
+    try {
+        // Fetch current market price for reference just in case we need to update stored price
+        // For existing deals, we might want to keep the original market price OR update it if switched to FIXED
+        // For simplicity, let's just update the stored fields.
+
+        const currentMarketPrice = await GoldPriceService.getLivePricePerKg();
+        let pricePerKg = 0;
+
+        // Recalculate pricePerKg based on new params
+        pricePerKg = GoldPriceService.calculateDealPrice(currentMarketPrice, purity, discount);
+
+        await prisma.deal.update({
+            where: { id },
+            data: {
+                company,
+                commodity,
+                type,
+                pricingModel,
+                quantity,
+                // Note: availableQuantity logic is tricky. If quantity changed, how does it affect available?
+                // For now assuming Admin manages availableQuantity manually or resets it if quantity changes drastically?
+                // Let's NOT update availableQuantity automatically here to avoid overriding sales, 
+                // unless it was previously full and now we added more? 
+                // User requirement: "edit deals". 
+                // Let's start with basic fields.
+                purity,
+                discount,
+                pricePerKg: pricingModel === 'FIXED' ? pricePerKg : 0, // 0 or placeholder
+            },
+        });
+
+        revalidatePath("/admin");
+        revalidatePath("/dashboard");
+    } catch (error) {
+        console.error("Update deal error:", error);
+        return "Failed to update deal";
+    }
+
+    redirect("/admin/deals");
+}
+
+export async function updateUserRole(userId: string, newRole: 'USER' | 'ADMIN') {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+        throw new Error("Unauthorized");
+    }
+
+    try {
+        await prisma.user.update({
+            where: { id: userId },
+            data: { role: newRole }
+        });
+        revalidatePath("/admin/users");
+    } catch (error) {
+        throw new Error("Failed to update role");
+    }
+}
+
+export async function adminAdjustBalance(userId: string, amount: number, reason: string) {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+        throw new Error("Unauthorized");
+    }
+
+    try {
+        await prisma.$transaction(async (tx) => {
+            await tx.user.update({
+                where: { id: userId },
+                data: { balance: { increment: amount } }
+            });
+
+            await tx.transaction.create({
+                data: {
+                    userId: userId,
+                    type: amount >= 0 ? "DEPOSIT" : "WITHDRAWAL",
+                    amount: Math.abs(amount),
+                    status: "COMPLETED",
+                    reference: `Admin Adjustment: ${reason}`
+                }
+            });
+        });
+        revalidatePath("/admin/users");
+    } catch (error) {
+        throw new Error("Failed to adjust balance");
+    }
+}
