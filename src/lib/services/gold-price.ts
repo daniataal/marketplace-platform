@@ -57,7 +57,16 @@ export class GoldPriceService {
         } catch (error) {
             // Use fallback price when API is unreachable
             console.warn("⚠️ Gold API unreachable, using fallback price");
-            console.error(`Gold API Error:`, error instanceof Error ? error.message : error);
+
+            // Log detailed error information
+            if (error instanceof Error) {
+                console.error(`Gold API Error: ${error.message}`);
+                console.error('Error name:', error.name);
+                console.error('Error cause:', error.cause);
+                console.error('Full error:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+            } else {
+                console.error('Unknown error type:', error);
+            }
 
             // Return cached price if available, otherwise use fallback
             if (this.cachedPrice > 0) {
