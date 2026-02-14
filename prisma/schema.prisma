@@ -63,6 +63,7 @@ model User {
   passportNumber String?
   nationality   String?
   kycDocuments  Json?     // Store URLs or metadata for uploaded docs
+  walletFrozen  Boolean   @default(false) // Admin can freeze wallet to prevent transactions
   transactions  Transaction[]
 }
 

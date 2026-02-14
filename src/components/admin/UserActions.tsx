@@ -2,18 +2,20 @@
 
 import { useState } from 'react';
 import { updateUserRole, adminAdjustBalance, adminResetPassword } from '@/lib/actions';
-import { Settings, DollarSign, X, Check, Lock } from 'lucide-react';
+import { Settings, DollarSign, X, Check, Lock, Snowflake } from 'lucide-react';
 
 interface UserActionsProps {
     userId: string;
     currentRole: string;
     userName: string;
+    walletFrozen: boolean;
 }
 
-export function UserActions({ userId, currentRole, userName }: UserActionsProps) {
+export function UserActions({ userId, currentRole, userName, walletFrozen }: UserActionsProps) {
     const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [isFrozen, setIsFrozen] = useState(walletFrozen);
 
     const handleRoleChange = async (newRole: string) => {
         if (newRole === currentRole) return;
@@ -24,6 +26,29 @@ export function UserActions({ userId, currentRole, userName }: UserActionsProps)
             await updateUserRole(userId, newRole as 'USER' | 'ADMIN');
         } catch (error) {
             alert("Failed to update role");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleFreezeToggle = async () => {
+        const action = isFrozen ? 'unfreeze' : 'freeze';
+        if (!confirm(`Are you sure you want to ${action} ${userName}'s wallet?`)) return;
+
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/admin/users/${userId}/freeze`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ frozen: !isFrozen })
+            });
+
+            if (!res.ok) throw new Error('Failed to update wallet status');
+
+            setIsFrozen(!isFrozen);
+            window.location.reload(); // Refresh to show updated status
+        } catch (error) {
+            alert(`Failed to ${action} wallet`);
         } finally {
             setLoading(false);
         }
@@ -47,6 +72,18 @@ export function UserActions({ userId, currentRole, userName }: UserActionsProps)
                 title="Adjust Balance"
             >
                 <DollarSign className="w-4 h-4" />
+            </button>
+
+            <button
+                onClick={handleFreezeToggle}
+                className={`p-1.5 rounded-lg transition-colors ${isFrozen
+                        ? 'text-blue-500 bg-blue-500/10 hover:bg-blue-500/20'
+                        : 'text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10'
+                    }`}
+                title={isFrozen ? "Unfreeze Wallet" : "Freeze Wallet"}
+                disabled={loading}
+            >
+                <Snowflake className="w-4 h-4" />
             </button>
 
             <button

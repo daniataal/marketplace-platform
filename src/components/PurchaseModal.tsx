@@ -423,8 +423,8 @@ SELLER: ${sellerName}
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-6 bg-secondary/10">
-                            <div className="bg-white dark:bg-gray-900 p-8 rounded-lg border border-border">
-                                <pre className="whitespace-pre-wrap font-mono text-xs text-foreground leading-relaxed">
+                            <div className="bg-white p-8 rounded-lg border border-border shadow-inner">
+                                <pre className="whitespace-pre-wrap font-mono text-xs text-gray-900 leading-relaxed">
                                     {spaTerms}
                                 </pre>
                             </div>
