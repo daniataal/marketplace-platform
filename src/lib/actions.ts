@@ -126,6 +126,7 @@ export async function createDeal(
 
     const company = formData.get("company") as string;
     const commodity = formData.get("commodity") as string;
+    const deliveryLocation = formData.get("deliveryLocation") as string || "Dubai";
     const type = formData.get("type") as string || "BULLION";
     const pricingModel = formData.get("pricingModel") as string || "FIXED";
     const quantity = parseFloat(formData.get("quantity") as string);
@@ -170,6 +171,7 @@ export async function createDeal(
                 externalId: `MANUAL-${Date.now()}`,
                 company,
                 commodity,
+                deliveryLocation,
                 type,
                 purity,
                 pricingModel,
@@ -228,6 +230,7 @@ export async function updateDeal(
 
     const company = formData.get("company") as string;
     const commodity = formData.get("commodity") as string;
+    const deliveryLocation = formData.get("deliveryLocation") as string || 'Dubai';
     const type = formData.get("type") as string;
     const pricingModel = formData.get("pricingModel") as string;
     const quantity = parseFloat(formData.get("quantity") as string);
@@ -258,6 +261,7 @@ export async function updateDeal(
             data: {
                 company,
                 commodity,
+                deliveryLocation,
                 type,
                 pricingModel,
                 quantity,

@@ -136,6 +136,22 @@ export default function CreateDealPage() {
                                 </div>
 
                                 <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="deliveryLocation">Origin Location</label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            name="deliveryLocation"
+                                            id="deliveryLocation"
+                                            required
+                                            defaultValue="Dubai"
+                                            className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50 pl-10"
+                                            placeholder="e.g. Dubai, Ghana, London"
+                                        />
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">📍</span>
+                                    </div>
+                                </div>
+
+                                <div>
                                     <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="quantity">Quantity (kg)</label>
                                     <input
                                         type="number"

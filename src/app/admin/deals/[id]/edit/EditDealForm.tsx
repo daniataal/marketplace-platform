@@ -95,6 +95,21 @@ export default function EditDealForm({ deal }: { deal: any }) {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Origin Location</label>
+                                    <div className="relative">
+                                        <input
+                                            name="deliveryLocation"
+                                            defaultValue={deal.deliveryLocation || 'Dubai'}
+                                            type="text"
+                                            required
+                                            className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all pl-10"
+                                            placeholder="e.g. Dubai, Ghana, London"
+                                        />
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">📍</span>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground mt-1">Where the commodity is currently located</p>
+                                </div>
+                                <div>
                                     <label className="block text-sm font-medium mb-2 text-muted-foreground">Quantity (kg)</label>
                                     <input
                                         name="quantity"
@@ -107,6 +122,7 @@ export default function EditDealForm({ deal }: { deal: any }) {
                                     />
                                 </div>
                             </div>
+
                         </div>
 
                         {/* Config Panel */}
@@ -177,8 +193,8 @@ export default function EditDealForm({ deal }: { deal: any }) {
                                                 type="button"
                                                 onClick={() => setPricingModel(model)}
                                                 className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${pricingModel === model
-                                                        ? 'bg-background text-foreground shadow-sm'
-                                                        : 'text-muted-foreground hover:text-foreground'
+                                                    ? 'bg-background text-foreground shadow-sm'
+                                                    : 'text-muted-foreground hover:text-foreground'
                                                     }`}
                                             >
                                                 {model === 'FIXED' ? 'Fixed Rate' : 'Live / Dynamic'}
