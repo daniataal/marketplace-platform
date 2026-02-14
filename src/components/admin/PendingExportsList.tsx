@@ -2,15 +2,24 @@
 
 import { useState } from 'react';
 import { Eye } from 'lucide-react';
-import ExportReviewModal from './ExportReviewModal';
+import ExportReviewModal from '@/components/admin/ExportReviewModal';
 
 type PendingExport = {
     id: string;
+    cfType: string;
     cfName: string;
-    cfAmountRequired: number;
+    cfIcon: string;
     cfRisk: string;
     cfTargetApy: number;
     cfDuration: number;
+    cfMinInvestment: number;
+    cfAmountRequired: number;
+    cfDescription: string;
+    cfOrigin: string;
+    cfDestination: string;
+    cfTransportMethod: string;
+    cfMetalForm: string;
+    cfPurityPercent: number;
     createdAt: Date;
     deal: {
         company: string;
@@ -73,8 +82,8 @@ export default function PendingExportsList({ exports }: { exports: PendingExport
                                 <td className="py-4 px-4">
                                     <div>
                                         <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${exp.cfRisk === 'Low' ? 'bg-green-500/20 text-green-500' :
-                                                exp.cfRisk === 'Medium' ? 'bg-yellow-500/20 text-yellow-500' :
-                                                    'bg-red-500/20 text-red-500'
+                                            exp.cfRisk === 'Medium' ? 'bg-yellow-500/20 text-yellow-500' :
+                                                'bg-red-500/20 text-red-500'
                                             }`}>
                                             {exp.cfRisk}
                                         </span>
