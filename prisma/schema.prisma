@@ -92,6 +92,13 @@ model Purchase {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   
+  // Logistics tracking (admin-only)
+  logisticsCompany String?  // Loomis International, Brinks, G4S, Malca-Amit, etc.
+  trackingNumber   String?  // Tracking number from logistics company
+  shippedAt        DateTime? // When package was shipped
+  deliveredAt      DateTime? // When package was delivered
+  logisticsNotes   String?  @db.Text // Admin notes about logistics
+  
   deal             Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
   buyer            User     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
   pendingExports   PendingExport[]

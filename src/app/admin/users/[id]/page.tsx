@@ -25,6 +25,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                         userId={user.id}
                         currentRole={user.role}
                         userName={user.name || 'User'}
+                        walletFrozen={user.walletFrozen}
                     />
                 </div>
             </div>
