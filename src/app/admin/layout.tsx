@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, PlusCircle, LogOut, Settings } from "lucide-react";
+import { LayoutDashboard, PlusCircle, LogOut, Settings, FileCheck } from "lucide-react";
 import { signOut } from "@/auth";
 
 export default function AdminLayout({
@@ -34,6 +34,13 @@ export default function AdminLayout({
                     >
                         <PlusCircle className="w-5 h-5" />
                         Create Deal
+                    </Link>
+                    <Link
+                        href="/admin/exports"
+                        className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:bg-secondary/50 hover:text-foreground rounded-lg transition-colors"
+                    >
+                        <FileCheck className="w-5 h-5" />
+                        Pending Exports
                     </Link>
                     <Link
                         href="/admin/users"
