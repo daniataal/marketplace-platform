@@ -35,6 +35,14 @@ export async function depositFunds(amount: number, reference: string = "Manual D
     const session = await auth();
     if (!session?.user?.email) throw new Error("Unauthorized");
 
+    const user = await prisma.user.findUnique({
+        where: { email: session.user.email }
+    });
+
+    if (!user) throw new Error("User not found");
+    // @ts-ignore - Check if wallet is frozen (property may be missing in types until regen)
+    if (user.walletFrozen) throw new Error("Wallet is frozen. Cannot deposit funds.");
+
     try {
         await prisma.$transaction(async (tx) => {
             // 1. Update User Balance
@@ -44,6 +52,7 @@ export async function depositFunds(amount: number, reference: string = "Manual D
             });
 
             // 2. Create Transaction Record
+            // @ts-ignore - Transaction model access (type issue)
             await tx.transaction.create({
                 data: {
                     userId: session.user.id!,
@@ -57,9 +66,9 @@ export async function depositFunds(amount: number, reference: string = "Manual D
 
         revalidatePath("/dashboard");
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Deposit failed:", error);
-        throw new Error("Deposit failed");
+        throw new Error(error.message || "Deposit failed");
     }
 }
 
@@ -72,7 +81,11 @@ export async function withdrawFunds(amount: number, iban: string) {
             where: { email: session.user.email }
         });
 
-        if (!user || user.balance < amount) {
+        if (!user) throw new Error("User not found");
+        // @ts-ignore - Check if wallet is frozen
+        if (user.walletFrozen) throw new Error("Wallet is frozen. Cannot withdraw funds.");
+
+        if (user.balance < amount) {
             throw new Error("Insufficient funds");
         }
 
@@ -84,6 +97,7 @@ export async function withdrawFunds(amount: number, iban: string) {
             });
 
             // 2. Create Transaction Record
+            // @ts-ignore - Transaction model access
             await tx.transaction.create({
                 data: {
                     userId: session.user.id!,
@@ -107,6 +121,7 @@ export async function getTransactions() {
     const session = await auth();
     if (!session?.user?.email) return [];
 
+    // @ts-ignore - Transaction model access
     return await prisma.transaction.findMany({
         where: { userId: session.user.id },
         orderBy: { createdAt: 'desc' },
