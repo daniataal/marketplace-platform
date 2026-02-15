@@ -61,7 +61,7 @@ export function PurchaseModal({ isOpen, onClose, deal, userBalance, userInfo, se
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const finalPrice = deal.pricePerKg * (1 - deal.discount / 100);
+    const finalPrice = deal.pricePerKg;
     const totalCost = quantity * finalPrice;
     const isInsufficient = totalCost > userBalance;
 

@@ -35,14 +35,22 @@ export async function POST(
         }
 
         // 2. Check available quantity
-        if (quantity > deal.availableQuantity) {
+        const d = deal as any;
+        if (quantity > d.availableQuantity) {
             return NextResponse.json({
-                error: `Only ${deal.availableQuantity} kg available`
+                error: `Only ${d.availableQuantity} kg available`
             }, { status: 400 });
         }
 
         // 3. Calculate cost
-        const finalPrice = deal.pricePerKg * (1 - deal.discount / 100);
+        const { GoldPriceService } = await import("@/lib/services/gold-price");
+        let finalPrice = d.pricePerKg;
+
+        if (d.pricingModel === 'DYNAMIC') {
+            const livePrice = await GoldPriceService.getLivePricePerKg();
+            finalPrice = GoldPriceService.calculateDealPrice(livePrice, d.purity, d.discount);
+        }
+
         const totalCost = quantity * finalPrice;
 
         // 4. Check user balance
@@ -102,7 +110,6 @@ export async function POST(
         // 6. Create Pending Export for Admin Review
         // Instead of immediately exporting, create a pending export record
         try {
-            const d = deal as any;
             await (prisma as any).pendingExport.create({
                 data: {
                     purchaseId: result.purchase.id,
@@ -131,7 +138,6 @@ export async function POST(
         }
 
         // 7. Create Agreement (SPA) record if terms provided
-        const d = deal as any;
         if (agreementTerms) {
             try {
                 // Extract buyer name from agreement terms (it's in the format "BUYER: Name")
