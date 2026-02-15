@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
-import { SpaGeneratorService } from "@/lib/services/spa-generator";
 
 export async function POST(
     request: NextRequest,
@@ -130,43 +129,31 @@ export async function POST(
             console.error(`[Marketplace] Failed to create pending export:`, err.message);
         }
 
-        // 7. Create Agreement (SPA) if terms provided
+        // 7. Create Agreement (SPA) record if terms provided
         if (agreementTerms) {
             try {
                 // Extract buyer name from agreement terms (it's in the format "BUYER: Name")
                 const buyerMatch = agreementTerms.match(/BUYER:\s*(.+)/);
                 const sellerMatch = agreementTerms.match(/SELLER:\s*(.+)/);
-                const buyerName = buyerMatch ? buyerMatch[1].trim() : buyer.name || 'Buyer';
+                const buyerName = buyerMatch ? buyerMatch[1].trim() : (buyer?.name || 'Buyer');
                 const sellerName = sellerMatch ? sellerMatch[1].trim() : deal.company;
 
-                // Generate personalized DRAFT SPA using the template
-                const agreementPath = await SpaGeneratorService.generateSpa({
-                    sellerName: sellerName,
-                    buyerName: buyerName,
-                    quantity: quantity,
-                    pricePerKg: finalPrice,
-                    totalCost: totalCost,
-                    commodity: deal.commodity,
-                    purity: `${(deal.purity * 100).toFixed(2)}%`,
-                    deliveryLocation: deliveryLocation || deal.deliveryLocation,
-                    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-                }, deal.id, session.user.id);
-
+                // Create Agreement record (PDF generation moved to client-side)
                 await prisma.agreement.create({
                     data: {
                         dealId: deal.id,
                         buyerName: buyerName,
                         sellerName: sellerName,
                         agreementDate: new Date(),
-                        terms: "Standard SPA Template applied (Draft). See attached document.",
+                        terms: "Standard SPA Template applied. PDF generated client-side.",
                         status: 'DRAFT',
-                        pdfUrl: agreementPath // This will point to the generated .docx file
+                        pdfUrl: null
                     }
                 });
 
-                console.log(`[Marketplace] Created DRAFT SPA for deal ${deal.id} at ${agreementPath}`);
+                console.log(`[Marketplace] Created Agreement record for deal ${deal.id}`);
             } catch (err: any) {
-                console.error(`[Marketplace] Failed to create agreement:`, err.message);
+                console.error(`[Marketplace] Failed to create agreement record:`, err.message);
                 // Don't fail the purchase if agreement creation fails
             }
         }
