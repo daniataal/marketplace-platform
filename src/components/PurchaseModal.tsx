@@ -351,13 +351,8 @@ SELLER: ${sellerName}
                                         });
                                         const data = await res.json();
                                         if (data.previewUrl) {
-                                            // Create a temporary link to download
-                                            const link = document.createElement('a');
-                                            link.href = data.previewUrl;
-                                            link.download = `Draft_SPA_${deal.id}.pdf`; // Changed to .pdf
-                                            document.body.appendChild(link);
-                                            link.click();
-                                            document.body.removeChild(link);
+                                            // Open the PDF in a new tab for preview
+                                            window.open(data.previewUrl, '_blank');
                                         }
                                     } catch (e) {
                                         console.error(e);
@@ -370,7 +365,7 @@ SELLER: ${sellerName}
                                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
                             >
                                 <Eye className="w-4 h-4" />
-                                {loading ? 'Generating...' : 'Download Draft SPA With Your Details'}
+                                {loading ? 'Generating...' : 'Preview Draft SPA'}
                             </button>
 
                             <label className="flex items-start gap-3 cursor-pointer group mt-3">
