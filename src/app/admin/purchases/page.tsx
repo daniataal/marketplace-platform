@@ -6,11 +6,12 @@ import SpaViewButton from "@/components/SpaViewButton";
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPurchasesPage() {
-    const purchases = await prisma.purchase.findMany({
+    const purchases = await (prisma as any).purchase.findMany({
         orderBy: { createdAt: 'desc' },
         include: {
             buyer: true,
-            deal: true
+            deal: true,
+            agreement: true
         }
     });
 

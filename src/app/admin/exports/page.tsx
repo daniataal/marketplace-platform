@@ -27,7 +27,8 @@ export default async function ExportsPage({
             deal: true,
             purchase: {
                 include: {
-                    buyer: true
+                    buyer: true,
+                    agreement: true
                 }
             }
         },

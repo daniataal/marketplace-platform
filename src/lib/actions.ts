@@ -464,3 +464,47 @@ export async function adminResetPassword(userId: string, newPassword: string) {
         throw new Error("Failed to reset password");
     }
 }
+export async function signPurchaseAgreement(purchaseId: string, spaData: any) {
+    const session = await auth();
+    if (!session) throw new Error("Unauthorized");
+
+    try {
+        const purchase = await prisma.purchase.findUnique({
+            where: { id: purchaseId },
+            include: { buyer: true }
+        });
+
+        if (!purchase) throw new Error("Purchase not found");
+
+        // Only buyer or admin can sign
+        if (session.user.role !== 'ADMIN' && session.user.id !== purchase.buyerId) {
+            throw new Error("Unauthorized to sign this agreement");
+        }
+
+        const buyerName = `${purchase.buyer?.firstName || purchase.buyer?.name || ''} ${purchase.buyer?.lastName || ''}`.trim() || 'Buyer';
+
+        await prisma.agreement.upsert({
+            where: { purchaseId },
+            create: {
+                purchaseId,
+                buyerName,
+                sellerName: (spaData as any).SELLER_NAME || "Seller",
+                status: "SIGNED",
+                spaData: spaData as any,
+                agreementDate: new Date()
+            },
+            update: {
+                status: "SIGNED",
+                spaData: spaData as any,
+                agreementDate: new Date()
+            }
+        });
+
+        revalidatePath("/orders");
+        revalidatePath("/admin/purchases");
+        return { success: true };
+    } catch (error) {
+        console.error("Sign agreement error:", error);
+        throw error;
+    }
+}

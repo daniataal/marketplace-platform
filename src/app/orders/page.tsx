@@ -19,7 +19,8 @@ export default async function OrdersPage() {
         },
         include: {
             deal: true,
-            buyer: true
+            buyer: true,
+            agreement: true
         },
         orderBy: { createdAt: 'desc' }
     });
@@ -61,57 +62,59 @@ export default async function OrdersPage() {
                             <p className="text-muted-foreground mt-1">Visit the dashboard to start trading.</p>
                         </div>
                     ) : (
-                        purchases.map((purchase) => (
-                            <div key={purchase.id} className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <span className="text-xs font-bold px-2 py-1 rounded bg-primary/10 text-primary uppercase tracking-wider">
-                                            {purchase.deal.commodity}
-                                        </span>
-                                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                            <Calendar className="w-3 h-3" />
-                                            {new Date(purchase.createdAt).toLocaleDateString()}
-                                        </span>
-                                    </div>
-                                    <h3 className="text-xl font-bold text-foreground">{purchase.deal.company}</h3>
-                                    <p className="text-sm text-muted-foreground">Purchase ID: {purchase.id.slice(0, 8)}...</p>
-                                    <p className="text-xs text-muted-foreground">Deal Ref: {purchase.deal.externalId}</p>
-                                </div>
-
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                                    <div>
-                                        <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                                            <Weight className="w-3 h-3" /> Quantity
-                                        </p>
-                                        <p className="font-mono text-foreground font-medium">{purchase.quantity} kg</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                                            <DollarSign className="w-3 h-3" /> Total Value
-                                        </p>
-                                        <p className="font-mono text-accent font-bold">
-                                            ${purchase.totalPrice.toLocaleString()}
-                                        </p>
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <div>
-                                            <p className="text-xs text-muted-foreground mb-1">Status</p>
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${purchase.status === 'DELIVERED' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                                                purchase.status === 'SHIPPED' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                                                    'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-                                                }`}>
-                                                {purchase.status}
+                        purchases.map((p) => {
+                            const purchase = p as any;
+                            return (
+                                <div key={purchase.id} className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <span className="text-xs font-bold px-2 py-1 rounded bg-primary/10 text-primary uppercase tracking-wider">
+                                                {purchase.deal?.commodity}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                <Calendar className="w-3 h-3" />
+                                                {new Date(purchase.createdAt).toLocaleDateString()}
                                             </span>
                                         </div>
-                                        {/* Since SPA generation is client-side, we should probably have a button to recreate it */}
-                                        <SpaViewButton
-                                            purchase={purchase}
-                                            sellerConfig={sellerConfig}
-                                        />
+                                        <h3 className="text-xl font-bold text-foreground">{purchase.deal?.company}</h3>
+                                        <p className="text-sm text-muted-foreground">Purchase ID: {purchase.id.slice(0, 8)}...</p>
+                                        <p className="text-xs text-muted-foreground">Deal Ref: {purchase.deal?.externalId}</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                                        <div>
+                                            <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                                <Weight className="w-3 h-3" /> Quantity
+                                            </p>
+                                            <p className="font-mono text-foreground font-medium">{purchase.quantity} kg</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                                <DollarSign className="w-3 h-3" /> Total Value
+                                            </p>
+                                            <p className="font-mono text-accent font-bold">
+                                                ${purchase.totalPrice?.toLocaleString()}
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            <div>
+                                                <p className="text-xs text-muted-foreground mb-1">Status</p>
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${purchase.status === 'DELIVERED' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                                                    purchase.status === 'SHIPPED' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                                                        'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                                    }`}>
+                                                    {purchase.status}
+                                                </span>
+                                            </div>
+                                            <SpaViewButton
+                                                purchase={purchase}
+                                                sellerConfig={sellerConfig}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
             </main>
