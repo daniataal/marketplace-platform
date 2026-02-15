@@ -53,7 +53,7 @@ services:
       postgres:
         condition: service_healthy
     # Run migrations on start (using db push for schema sync without migrations)
-    command: sh -c "npx prisma db push --skip-generate --accept-data-loss && node server.js"
+    command: sh -c "node node_modules/prisma/build/index.js db push --skip-generate --accept-data-loss && node server.js"
 
 
 volumes:
