@@ -113,7 +113,10 @@ export class SpaGeneratorService {
 
             await mdToPdf({ content: content }, {
                 dest: outputPath,
-                launch_options: launchOptions
+                launch_options: {
+                    ...launchOptions,
+                    headless: 'new' // Use new headless mode
+                }
             });
 
             console.log(`[SPA Generator] Generated agreement at ${relativePath}`);
