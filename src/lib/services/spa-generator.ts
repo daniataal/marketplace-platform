@@ -87,7 +87,10 @@ export class SpaGeneratorService {
             const relativePath = `/documents/agreements/${fileName}`;
             const outputPath = path.resolve(`./public${relativePath}`);
 
-            await mdToPdf({ content: content }, { dest: outputPath });
+            await mdToPdf({ content: content }, {
+                dest: outputPath,
+                launch_options: { args: ['--no-sandbox', '--disable-setuid-sandbox'] }
+            });
 
             console.log(`[SPA Generator] Generated agreement at ${relativePath}`);
             return relativePath;
