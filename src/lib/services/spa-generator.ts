@@ -1,7 +1,6 @@
-import PizZip from 'pizzip';
-import Docxtemplater from 'docxtemplater';
 import fs from 'fs';
 import path from 'path';
+import { mdToPdf } from 'md-to-pdf';
 
 export class SpaGeneratorService {
     /**
@@ -22,54 +21,73 @@ export class SpaGeneratorService {
             purity: string;
             deliveryLocation: string;
             date: string;
+            buyerAddress?: string; // Optional fields for fuller template
+            buyerLicense?: string;
+            buyerRep?: string;
+            buyerPassport?: string;
+            buyerCountry?: string;
+            buyerEmail?: string;
         },
         dealId: string,
         buyerId: string
     ): Promise<string> {
         try {
             // Load the template
-            const templatePath = path.resolve('./public/documents/spa_template.docx');
+            // Note: Updated to use Markdown template
+            const templatePath = path.resolve('./src/lib/templates/spa_template.md');
 
             if (!fs.existsSync(templatePath)) {
                 throw new Error('SPA Template not found');
             }
 
-            const content = fs.readFileSync(templatePath, 'binary');
-            const zip = new PizZip(content);
-
-            const doc = new Docxtemplater(zip, {
-                paragraphLoop: true,
-                linebreaks: true,
-            });
+            let content = fs.readFileSync(templatePath, 'utf-8');
 
             // Set the data
-            // We use uppercase keys as convention for placeholders in Word docs
-            doc.render({
-                SELLER_NAME: data.sellerName,
-                BUYER_NAME: data.buyerName,
-                QUANTITY: data.quantity.toFixed(2),
-                PRICE: data.pricePerKg.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-                TOTAL_COST: data.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-                COMMODITY: data.commodity,
-                PURITY: data.purity,
-                DELIVERY_LOCATION: data.deliveryLocation,
-                DATE: data.date,
-                DEAL_ID: dealId,
-                BUYER_ID: buyerId
-            });
+            const replacements: { [key: string]: string } = {
+                '{SELLER_NAME}': process.env.SELLER_COMPANY_NAME || data.sellerName || "Default Seller",
+                '{SELLER_ADDRESS}': process.env.SELLER_ADDRESS || "Meydan Grandstand, Xth Floor, Meydan Road, Nad Al Sheba, Dubai, UAE",
+                '{SELLER_LICENSE}': process.env.SELLER_TRADE_LICENSE || "XXX7157.01",
+                '{SELLER_REP}': process.env.SELLER_REPRESENTATIVE || "Xxxlefo Moshanyana",
+                '{SELLER_PASSPORT}': process.env.SELLER_PASSPORT_NUMBER || "A11611XXX",
+                '{SELLER_PASSPORT_EXPIRY}': process.env.SELLER_PASSPORT_EXPIRY || "13/11/2034",
+                '{SELLER_COUNTRY}': process.env.SELLER_COUNTRY || "South Africa - ZAF",
+                '{SELLER_PHONE}': process.env.SELLER_TELEPHONE || "XXX 638 9245",
+                '{SELLER_EMAIL}': process.env.SELLER_EMAIL || "[Email]",
+
+                '{SELLER_BANK_NAME}': process.env.SELLER_BANK_NAME || "[Bank Name]",
+                '{SELLER_BANK_ADDRESS}': process.env.SELLER_BANK_ADDRESS || "[Bank Address]",
+                '{SELLER_ACCOUNT_NAME}': process.env.SELLER_ACCOUNT_NAME || "[Account Name]",
+                '{SELLER_ACCOUNT_NUMBER}': process.env.SELLER_ACCOUNT_NUMBER || "[Account Number]",
+                '{SELLER_SWIFT}': process.env.SELLER_SWIFT_CODE || "[SWIFT Code]",
+
+                '{BUYER_NAME}': data.buyerName,
+                '{QUANTITY}': data.quantity.toFixed(2),
+                '{PRICE}': data.pricePerKg.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+                '{TOTAL_COST}': data.totalCost.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+                '{COMMODITY}': data.commodity,
+                '{PURITY}': data.purity,
+                '{DELIVERY_LOCATION}': data.deliveryLocation,
+                '{DATE}': data.date,
+                '{DEAL_ID}': dealId,
+                '{BUYER_ADDRESS}': data.buyerAddress || "[Buyer Address]",
+                '{BUYER_LICENSE}': data.buyerLicense || "[Buyer License]",
+                '{BUYER_REP}': data.buyerRep || data.buyerName,
+                '{BUYER_PASSPORT}': data.buyerPassport || "[Passport No]",
+                '{BUYER_COUNTRY}': data.buyerCountry || "[Country]",
+                '{BUYER_EMAIL}': data.buyerEmail || "[Email]"
+            };
+
+            for (const [key, value] of Object.entries(replacements)) {
+                // Escape special regex characters in the key if necessary, though our keys are simple
+                content = content.replace(new RegExp(key, 'g'), value);
+            }
 
             // Generate the document
-            const buf = doc.getZip().generate({
-                type: 'nodebuffer',
-                compression: 'DEFLATE',
-            });
-
-            // Save the document
-            const fileName = `agreement_${dealId}_${Date.now()}.docx`;
+            const fileName = `agreement_${dealId}_${Date.now()}.pdf`;
             const relativePath = `/documents/agreements/${fileName}`;
             const outputPath = path.resolve(`./public${relativePath}`);
 
-            fs.writeFileSync(outputPath, buf);
+            await mdToPdf({ content: content }, { dest: outputPath });
 
             console.log(`[SPA Generator] Generated agreement at ${relativePath}`);
             return relativePath;
@@ -77,7 +95,9 @@ export class SpaGeneratorService {
         } catch (error) {
             console.error('[SPA Generator] Error generating SPA:', error);
             // Fallback to template if generation fails
-            return '/documents/spa_template.docx';
+            // Since we switched to MD, we can't fallback to the docx easily unless we return that path
+            // But the user wants MD basis.
+            return '/documents/spa_template.docx'; // Keep this fallback just in case for now or return empty
         }
     }
 }

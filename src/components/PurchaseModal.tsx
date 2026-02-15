@@ -354,7 +354,7 @@ SELLER: ${sellerName}
                                             // Create a temporary link to download
                                             const link = document.createElement('a');
                                             link.href = data.previewUrl;
-                                            link.download = `Draft_SPA_${deal.id}.docx`;
+                                            link.download = `Draft_SPA_${deal.id}.pdf`; // Changed to .pdf
                                             document.body.appendChild(link);
                                             link.click();
                                             document.body.removeChild(link);
