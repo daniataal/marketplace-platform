@@ -78,6 +78,21 @@ export function PurchaseModal({ isOpen, onClose, deal, userBalance, userInfo, se
     // Generate SPA terms
     const buyerName = `${userInfo?.firstName || userInfo?.name || ''} ${userInfo?.lastName || ''}`.trim() || 'Buyer';
     const sellerName = deal.company;
+
+    const getDeliveryCountry = () => {
+        if (deliveryLocation === 'Other') {
+            const parts = customLocation.split(',');
+            return parts[parts.length - 1].trim().toUpperCase() || 'UAE';
+        }
+        const locationMap: { [key: string]: string } = {
+            'Dubai': 'UAE',
+            'Johannesburg': 'ZAF',
+            'London': 'UK',
+            'Singapore': 'SGP',
+            'Mumbai': 'IND'
+        };
+        return locationMap[deliveryLocation] || 'UAE';
+    };
     const agreementDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     const spaTerms = `SALE AND PURCHASE AGREEMENT
@@ -377,7 +392,8 @@ SELLER: ${sellerName}
                                             AU_DELIVERY_PORT: "DXB – Dubai International Airport",
                                             AU_DESTINATION: fullDeliveryLocation,
                                             QUANTITY: quantity.toString(),
-                                            PRICE: `$${deal.pricePerKg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD/kg`
+                                            PRICE: `$${deal.pricePerKg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD/kg`,
+                                            DELIVERY_COUNTRY: getDeliveryCountry()
                                         });
 
                                         window.open(url, '_blank');

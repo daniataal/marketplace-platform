@@ -58,12 +58,13 @@ export interface SpaVariables {
     QUANTITY: string;
     PRICE: string;
     DEAL_ID: string;
+    DELIVERY_COUNTRY: string;
 }
 
 const SPA_TEMPLATE_TEXT = `
 SALE AND PURCHASE AGREEMENT (SPA)
 OF NON-REFINED GOLD (AU) BARS
-TRANSACTION CODE: CIF-FG-UAE-{DATE}-2025-00X
+TRANSACTION CODE: CIF-{SELLER_INITIALS}-{DELIVERY_COUNTRY}-{DATE}
 
 This Sales Purchase Agreement (SPA) is made and entered into on the {DATE}, by and between:
 SELLER:
@@ -76,7 +77,7 @@ Passport Expiration:	{SELLER_PASSPORT_EXPIRY}
 Country:		{SELLER_COUNTRY}
 Telephone:		 {SELLER_TELEPHONE}
 Email:			{SELLER_EMAIL}
-(Hereinater referred to as “THE SELLER” or “FG”)
+(Hereinater referred to as “THE SELLER” or “{SELLER_INITIALS}”)
 AND
 BUYER:
 Company Name: {BUYER_NAME}
@@ -88,7 +89,7 @@ Passport Expiration:
 Country:		{BUYER_COUNTRY}
 Telephone:		{BUYER_TELEPHONE}
 Email: {BUYER_EMAIL}
-(Hereinafter referred to as “THE BUYER” or “XX))
+(Hereinafter referred to as “THE BUYER” or “{BUYER_INITIALS}”)
 
 WHEREAS
 1. Seller’s Rights: The Seller has confirmed that they have the legal right to sell and market Gold in the form of Dore Bars as specified in Article 2, currently located in the United Arab Emirates 
@@ -108,37 +109,37 @@ Article 2 – Specification and Quantity of the Au Raw Gold
 • Port of Origin:		{AU_ORIGIN_PORT}
 • Port of Delivery:	{AU_DELIVERY_PORT}
 • Final Destination:	{AU_DESTINATION}
-• Quantity: 		{QUANTITY} kg - 10 Kg Spot  
-			Contract - 100 kg per month, with extensions as agreed between Parties
+• Quantity: 		{QUANTITY} kg - Spot  
+			Contract - {QUANTITY} kg per month, with extensions as agreed between Parties
 • Packing:	Export package boxes or any other suitable international accepted packaging
-• Price CIF: 		{PRICE} of Gold (AU) content - base price at 96% purity
+• Price CIF: 		{PRICE} of Gold (AU) content - base price at {AU_PURITY} purity
 3% Commissions to Intermediaries, paid by the Seller, according to IMFPA
 • Currency: 		All payments in United States Dollars
 • Payment Mode: 	Bank Transfer MT 103, after Final Assay Report at Refinery accepted by both Buyer and Seller
 • Assay Report:	Final Assay per kilo (gold content) to be made by Buyer’s Refinery and the assay value will be accepted by both parties.
 
 Article 3 – Delivery and Testing
-3.1 Terms (INCOTERMS 2020 all subsequent amendments) and Location: CIF DUBAI, UNITED ARAB EMIRATES (DXB)
-3.2 Buyer, Consignee, DXB: {BUYER_NAME}, {BUYER_ADDRESS}, {BUYER_REPRESENTED_BY}, {BUYER_TELEPHONE}, {BUYER_EMAIL}
+3.1 Terms (INCOTERMS 2020 all subsequent amendments) and Location: CIF {AU_DESTINATION}
+3.2 Buyer, Consignee, {AU_DESTINATION}: {BUYER_NAME}, {BUYER_ADDRESS}, {BUYER_REPRESENTED_BY}, {BUYER_TELEPHONE}, {BUYER_EMAIL}
 	
-3.3 Importing Customs Agent DXB: (Name, Address, Contact person, Contact number/s, Email address/s)
+3.3 Importing Customs Agent {AU_DESTINATION}: (Name, Address, Contact person, Contact number/s, Email address/s)
 
-3.4 Transport Company UAE: (Name, Address, Contact person, Contact number/s, Email address/s) (on behalf of the Buyer)
+3.4 Transport Company {AU_DESTINATION}: (Name, Address, Contact person, Contact number/s, Email address/s) (on behalf of the Buyer)
 
 3.5 UAE Refinery UAE:  (Name, Address, Contact person, Contact number/s, Email address/s) (on behalf of the Seller & Buyer)
 
 Article. 4 – Document Submission Requirements for Each Shipment
 4.1 Pre-Arrival Notification and Electronic Submission
-The Seller or its appointed Export Agent shall provide the Buyer with electronic copies (PDF format, scanned originals) of all shipment documentation via email to the office of the Fonkem Group, at least twenty-four (24) hours prior to the scheduled shipment departure from the country of origin.
+The Seller or its appointed Export Agent shall provide the Buyer with electronic copies (PDF format, scanned originals) of all shipment documentation via email to the office of {SELLER_NAME}, at least twenty-four (24) hours prior to the scheduled shipment departure from the country of origin.
 These documents must also be simultaneously shared with:
-• Dubai Customs (DXB)
-• XXX (Buyer’s appointed Customs Clearing Agent (e.g. Ferrari Logistics)
-• XXX Buyer’s Appointed Security Transport Company (e.g., Transguard)
-• XXX Buyer’s Designated Refinery
+• {AU_DESTINATION} Customs
+• {AU_DESTINATION} (Buyer’s appointed Customs Clearing Agent (e.g. Ferrari Logistics)
+• {AU_DESTINATION} Buyer’s Appointed Security Transport Company (e.g., Transguard)
+• {AU_DESTINATION} Buyer’s Designated Refinery
 4.2 Original Documents upon Arrival
-The Seller, or its Export Agent shall provide the Buyer with original physical copies of the documents listed below upon arrival of the consignment in Dubai, prior to transfer to the designated refinery. Failure to deliver original documents shall entitle the Buyer to delay testing, processing, or payment without penalty.
+The Seller, or its Export Agent shall provide the Buyer with original physical copies of the documents listed below upon arrival of the consignment in {AU_DESTINATION}, prior to transfer to the designated refinery. Failure to deliver original documents shall entitle the Buyer to delay testing, processing, or payment without penalty.
 4.3 Required Documentation (Per Shipment)
-The original documents must be provided to the Buyer upon arrival in Dubai:
+The original documents must be provided to the Buyer upon arrival in {AU_DESTINATION}:
 1. Three Original Pro-Forma Commercial Invoices: Must include an official stamp and signature
 2. Made out to the Buyer and the Buyer’s nominated customs clearance and security transport and storage company (e.g., Transguard, Ferrari Logistics, or equivalent), based on the weight and purity of the commodity as determined by the preliminary assay report.
 3. Certificate of Movement: (Mineral Export Certificate)
@@ -148,7 +149,7 @@ The original documents must be provided to the Buyer upon arrival in Dubai:
 7. Export Tax Paid Receipts
 8. Preliminary Assay Report
 9. Air Waybill
-10. Statement of Declaration: Declaring that goods originate from XXX.
+10. Statement of Declaration: Declaring that goods originate from {AU_ORIGIN}.
 11. ICGLR (International Conference on the Great Lakes Region) or UN Declaration Movement Certificate
 4.4 Accuracy And Authenticity documentation submitted by the Seller shall be true, complete, and accurate. Any attempt to forge, alter, or misrepresent documents shall be considered a material breach of this Agreement and shall entitle the Buyer to terminate the Agreement immediately, seek indemnities, and report the breach to relevant legal and regulatory authorities.
 
@@ -157,13 +158,13 @@ The Seller or Export Agent must, at their own expense, obtain cargo insurance th
 
 Art. 6 – Price
 a) The parties agree that the price to be paid by the Buyer to the Seller shall be calculated as specified in Article. 2 of this contract.
-b) The price will be based on the gold content (Au) in the gold bars, as determined before the final results of the ASI assay.
+b) The price will be based on the gold content (Au) in the gold bars, as determined before the final results of the assay.
 c) The payment calculation will be based on the net weight of gold determined by the buyers designated accredited gold refinery. The refinery must provide the results within twenty-four (24) hours of refining. If the results are finalized after regular business hours, the documentation will be presented before noon local time on the next working day.
 d) The Seller's invoice will be calculated based on the aforementioned results.
 e) The Seller shall not be responsible for any taxes, including VAT (currently zero VAT, hence irrelevant), or duties, and no deductions will be made other than those explicitly agreed upon in this contract. The Seller shall cover all personal expenses, such as flight, accommodation, and other related costs for themselves or their representatives. The Seller is responsible only for selling within the free zone and is not liable for any import procedures.
 
 Art. 7 – Obligations of Buyer and Seller
-a) The Seller must submit all required documentation to the Buyer, listing only XXX as the consignee 24 hrs before departing.
+a) The Seller must submit all required documentation to the Buyer, listing only {BUYER_NAME} as the consignee 24 hrs before departing.
 b) The Buyer irrevocably acknowledges that the Gold Bars remain the property of the Seller until the Seller has received full payment of the price as stipulated under Article. 6, irrespective of whether the Gold Bars have been imported, moved, or refined.
 c) Should the Buyer choose to import the Gold Bars into Dubai/UAE, the Buyer confirms their commitment to comply with all applicable legal regulations.
 d) The Buyer shall be responsible for any import taxes, including VAT (currently zero VAT, hence irrelevant), or duties in Dubai
@@ -176,8 +177,8 @@ Article. 8 – Payment
 8.1 The Buyer’s bank shall transfer the sale proceeds, as per the price defined in Article. 6, to the Seller’s account no later than two (2) banking days after the receipt of the refining results and the presentation of the contractual payment documents.
 8.2 Contractual payment documents include:
 a) All documents listed in Article. 4.
-b) The final invoice issued by the Seller, based on the refinery out-turn results as stipulated in Article.6. The invoice shall be calculated according to the refining results for the Dore bars at the Buyer’s declared refinery in Dubai.
-c) If the Seller involves a Financier, the Financier is required to issue a separate invoice directly to XXX for services rendered. This ensures clarity in financial records and separates the Financier's costs from the Seller’s direct expenses.
+b) The final invoice issued by the Seller, based on the refinery out-turn results as stipulated in Article.6. The invoice shall be calculated according to the refining results for the Dore bars at the Buyer’s declared refinery in {AU_DESTINATION}.
+c) If the Seller involves a Financier, the Financier is required to issue a separate invoice directly to {BUYER_NAME} for services rendered. This ensures clarity in financial records and separates the Financier's costs from the Seller’s direct expenses.
 
 Art. 9 – Banking Coordinates
 9.1 Seller’s Bank Information:
@@ -195,8 +196,8 @@ Art. 9 – Banking Coordinates
 • SWIFT: 
 
 Article. 10a – Procedure for First Delivery
-a) The Seller will IRREVOCABLY deliver all consignment to the Byers designated refinery in Dubai.
-b) The consignment will remain in the customs vault in the free zone, and the Notify Party will be informed that the goods are being held for the account of the Buyer. Coordination for pick-up and/or transfer of the cargo to the Buyer’s declared refinery in Dubai, UAE, will take place on the same day of arrival if cleared before 15:00. If cleared after 15:00, the transfer will occur the next working day before 12:00.
+a) The Seller will IRREVOCABLY deliver all consignment to the Byers designated refinery in {AU_DESTINATION}.
+b) The consignment will remain in the customs vault in the free zone, and the Notify Party will be informed that the goods are being held for the account of the Buyer. Coordination for pick-up and/or transfer of the cargo to the Buyer’s declared refinery in {AU_DESTINATION}, will take place on the same day of arrival if cleared before 15:00. If cleared after 15:00, the transfer will occur the next working day before 12:00.
 c) The cargo will be pre-weighed and pre-tested for Au content at the refinery, with a representative of the Seller present. Both parties will sign off on the quality and weight. The cargo will then be taken for refining, with the Seller's representative(s) present. After refining, the bullion will be tested and weighed, and the recovery rate should not be less than 97% of the pre-weighing and pre-testing results.
 d) The Buyer’s refinery will issue a weight and quality certificate with the final gold assay results. The Seller will issue the final invoice based on these results.
 e) The Buyer will initiate the bank wire transfer of the sales proceeds in accordance with the Seller’s invoice, based on the price terms in Article. 6, no later than two (2) banking days after the date of the assay report from the gold assay laboratory.
@@ -380,11 +381,33 @@ Buyer’s License
 `;
 
 export const SpaDocument = ({ variables }: { variables: SpaVariables }) => {
+    // Calculate Initials
+    const getInitials = (name: string) => {
+        if (!name) return "";
+        return name
+            .split(' ')
+            .filter(word => !['LLC-FZ', 'LLC', 'FZ', 'CORP', 'LTD', 'INC'].includes(word.toUpperCase()))
+            .map(word => word[0])
+            .join('')
+            .toUpperCase()
+            .substring(0, 3); // Max 3 chars
+    };
+
+    const sellerInitials = getInitials(variables.SELLER_NAME || "FG");
+    const buyerInitials = getInitials(variables.BUYER_NAME || "XX");
+
     let content = SPA_TEMPLATE_TEXT;
 
+    // Add initials to substitutions
+    const allVariables = {
+        ...variables,
+        SELLER_INITIALS: sellerInitials,
+        BUYER_INITIALS: buyerInitials
+    };
+
     // Replace all placeholders using a safer method
-    Object.keys(variables).forEach((key) => {
-        const val = (variables as any)[key] || `[${key} Pending]`;
+    Object.keys(allVariables).forEach((key) => {
+        const val = (allVariables as any)[key] || `[${key} Pending]`;
         const regex = new RegExp(`{${key}}`, 'g');
         content = content.replace(regex, val.toString());
     });
