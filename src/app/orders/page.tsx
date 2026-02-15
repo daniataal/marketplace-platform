@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import { Package, Calendar, DollarSign, Weight } from "lucide-react";
+import SpaViewButton from "@/components/SpaViewButton";
 
 export const dynamic = 'force-dynamic';
 
@@ -12,13 +13,29 @@ export default async function OrdersPage() {
         return <div>Please log in to view orders.</div>;
     }
 
-    const orders = await prisma.deal.findMany({
+    const purchases = await prisma.purchase.findMany({
         where: {
             buyerId: session.user.id,
-            status: { in: ['CLOSED', 'EXPORTED'] }
         },
-        orderBy: { updatedAt: 'desc' }
+        include: {
+            deal: true,
+            buyer: true
+        },
+        orderBy: { createdAt: 'desc' }
     });
+
+    // Get Seller Configuration for SPA
+    const sellerConfig = {
+        companyName: process.env.SELLER_COMPANY_NAME || "FONKEM GROUP LLC-FZ",
+        address: process.env.SELLER_ADDRESS || "Meydan Grandstand, Dubai, UAE",
+        tradeLicense: process.env.SELLER_TRADE_LICENSE || "2537157.01",
+        representative: process.env.SELLER_REPRESENTATIVE || "Thalefo Moshanyana",
+        passportNumber: process.env.SELLER_PASSPORT_NUMBER || "A11611955",
+        passportExpiry: process.env.SELLER_PASSPORT_EXPIRY || "13/11/2034",
+        country: process.env.SELLER_COUNTRY || "UAE",
+        telephone: process.env.SELLER_TELEPHONE || "(+27) 063 638 9245",
+        email: process.env.SELLER_EMAIL || ""
+    };
 
     return (
         <div className="min-h-screen bg-background relative overflow-hidden">
@@ -35,7 +52,7 @@ export default async function OrdersPage() {
                 </div>
 
                 <div className="space-y-4">
-                    {orders.length === 0 ? (
+                    {purchases.length === 0 ? (
                         <div className="bg-card border border-dashed border-border rounded-xl p-12 text-center">
                             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary mb-4">
                                 <Package className="w-8 h-8 text-muted-foreground" />
@@ -44,20 +61,21 @@ export default async function OrdersPage() {
                             <p className="text-muted-foreground mt-1">Visit the dashboard to start trading.</p>
                         </div>
                     ) : (
-                        orders.map((deal) => (
-                            <div key={deal.id} className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        purchases.map((purchase) => (
+                            <div key={purchase.id} className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-6">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
                                         <span className="text-xs font-bold px-2 py-1 rounded bg-primary/10 text-primary uppercase tracking-wider">
-                                            {deal.commodity}
+                                            {purchase.deal.commodity}
                                         </span>
                                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                                             <Calendar className="w-3 h-3" />
-                                            {new Date(deal.updatedAt).toLocaleDateString()}
+                                            {new Date(purchase.createdAt).toLocaleDateString()}
                                         </span>
                                     </div>
-                                    <h3 className="text-xl font-bold text-foreground">{deal.company}</h3>
-                                    <p className="text-sm text-muted-foreground">ID: {deal.externalId}</p>
+                                    <h3 className="text-xl font-bold text-foreground">{purchase.deal.company}</h3>
+                                    <p className="text-sm text-muted-foreground">Purchase ID: {purchase.id.slice(0, 8)}...</p>
+                                    <p className="text-xs text-muted-foreground">Deal Ref: {purchase.deal.externalId}</p>
                                 </div>
 
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
@@ -65,29 +83,31 @@ export default async function OrdersPage() {
                                         <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
                                             <Weight className="w-3 h-3" /> Quantity
                                         </p>
-                                        <p className="font-mono text-foreground font-medium">{deal.quantity} kg</p>
+                                        <p className="font-mono text-foreground font-medium">{purchase.quantity} kg</p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
                                             <DollarSign className="w-3 h-3" /> Total Value
                                         </p>
                                         <p className="font-mono text-accent font-bold">
-                                            ${(deal.quantity * deal.pricePerKg * (1 - deal.discount / 100)).toLocaleString()}
+                                            ${purchase.totalPrice.toLocaleString()}
                                         </p>
                                     </div>
                                     <div className="flex flex-col gap-2">
                                         <div>
                                             <p className="text-xs text-muted-foreground mb-1">Status</p>
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                                                Purchased
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${purchase.status === 'DELIVERED' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                                                purchase.status === 'SHIPPED' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                                                    'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                                }`}>
+                                                {purchase.status}
                                             </span>
                                         </div>
-                                        <a
-                                            href={`/dashboard/deals/${deal.id}/agreement`}
-                                            className="text-xs text-center border border-primary text-primary hover:bg-primary/10 px-3 py-1.5 rounded-md transition-colors"
-                                        >
-                                            View Agreement
-                                        </a>
+                                        {/* Since SPA generation is client-side, we should probably have a button to recreate it */}
+                                        <SpaViewButton
+                                            purchase={purchase}
+                                            sellerConfig={sellerConfig}
+                                        />
                                     </div>
                                 </div>
                             </div>

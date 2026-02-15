@@ -19,32 +19,15 @@ export default async function ExportsPage({
     const statusFilter = params.status || 'PENDING';
 
     // Fetch exports based on status filter
-    const exports = await prisma.pendingExport.findMany({
+    const exports = await (prisma as any).pendingExport.findMany({
         where: {
             status: statusFilter
         },
         include: {
-            deal: {
-                select: {
-                    company: true,
-                    commodity: true,
-                    type: true,
-                    purity: true
-                }
-            },
+            deal: true,
             purchase: {
-                select: {
-                    id: true,
-                    quantity: true,
-                    totalPrice: true,
-                    createdAt: true,
-                    buyer: {
-                        select: {
-                            id: true,
-                            name: true,
-                            email: true
-                        }
-                    }
+                include: {
+                    buyer: true
                 }
             }
         },
@@ -54,16 +37,16 @@ export default async function ExportsPage({
     });
 
     // Get counts for all statuses
-    const statusCounts = await prisma.pendingExport.groupBy({
+    const statusCounts = await (prisma as any).pendingExport.groupBy({
         by: ['status'],
         _count: true
     });
 
     const counts = {
-        PENDING: statusCounts.find(s => s.status === 'PENDING')?._count || 0,
-        APPROVED: statusCounts.find(s => s.status === 'APPROVED')?._count || 0,
-        REJECTED: statusCounts.find(s => s.status === 'REJECTED')?._count || 0,
-        EXPORTED: statusCounts.find(s => s.status === 'EXPORTED')?._count || 0,
+        PENDING: (statusCounts as any[]).find((s: any) => s.status === 'PENDING')?._count || 0,
+        APPROVED: (statusCounts as any[]).find((s: any) => s.status === 'APPROVED')?._count || 0,
+        REJECTED: (statusCounts as any[]).find((s: any) => s.status === 'REJECTED')?._count || 0,
+        EXPORTED: (statusCounts as any[]).find((s: any) => s.status === 'EXPORTED')?._count || 0,
     };
 
     return (

@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { X, CheckCircle, XCircle, Edit2, Loader2, AlertCircle } from 'lucide-react';
+import { X, CheckCircle, XCircle, Edit2, Loader2, AlertCircle, FileText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import SpaViewButton from '@/components/SpaViewButton';
 
 type ExportData = {
     id: string;
@@ -150,18 +151,34 @@ export default function ExportReviewModal({
                             </h2>
                             <p className="text-sm text-muted-foreground mt-1">
                                 Status: <span className={`font-medium ${exportData.status === 'EXPORTED' ? 'text-green-500' :
-                                        exportData.status === 'REJECTED' ? 'text-red-500' :
-                                            exportData.status === 'APPROVED' ? 'text-blue-500' :
-                                                'text-yellow-500'
+                                    exportData.status === 'REJECTED' ? 'text-red-500' :
+                                        exportData.status === 'APPROVED' ? 'text-blue-500' :
+                                            'text-yellow-500'
                                     }`}>{exportData.status}</span>
                             </p>
                         </div>
-                        <button
-                            onClick={onClose}
-                            className="p-2 hover:bg-secondary rounded-lg transition-colors"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <SpaViewButton
+                                purchase={exportData.purchase as any}
+                                sellerConfig={{
+                                    companyName: process.env.NEXT_PUBLIC_SELLER_COMPANY_NAME || "FONKEM GROUP LLC-FZ",
+                                    address: process.env.NEXT_PUBLIC_SELLER_ADDRESS || "Meydan Grandstand, Dubai, UAE",
+                                    tradeLicense: process.env.NEXT_PUBLIC_SELLER_TRADE_LICENSE || "2537157.01",
+                                    representative: process.env.NEXT_PUBLIC_SELLER_REPRESENTATIVE || "Thalefo Moshanyana",
+                                    passportNumber: process.env.NEXT_PUBLIC_SELLER_PASSPORT_NUMBER || "A11611955",
+                                    passportExpiry: process.env.NEXT_PUBLIC_SELLER_PASSPORT_EXPIRY || "13/11/2034",
+                                    country: process.env.NEXT_PUBLIC_SELLER_COUNTRY || "UAE",
+                                    telephone: process.env.NEXT_PUBLIC_SELLER_TELEPHONE || "(+27) 063 638 9245",
+                                    email: process.env.NEXT_PUBLIC_SELLER_EMAIL || ""
+                                }}
+                            />
+                            <button
+                                onClick={onClose}
+                                className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Content */}
@@ -200,8 +217,8 @@ export default function ExportReviewModal({
                         {/* Status Info for completed exports */}
                         {exportData.status !== 'PENDING' && (
                             <div className={`rounded-lg p-4 ${exportData.status === 'EXPORTED' ? 'bg-green-500/10 border border-green-500/20' :
-                                    exportData.status === 'REJECTED' ? 'bg-red-500/10 border border-red-500/20' :
-                                        'bg-blue-500/10 border border-blue-500/20'
+                                exportData.status === 'REJECTED' ? 'bg-red-500/10 border border-red-500/20' :
+                                    'bg-blue-500/10 border border-blue-500/20'
                                 }`}>
                                 <div className="flex items-start gap-3">
                                     {exportData.status === 'EXPORTED' && <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />}
