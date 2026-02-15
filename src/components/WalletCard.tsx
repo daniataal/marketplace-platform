@@ -22,7 +22,7 @@ export function WalletCard({ initialData }: { initialData: WalletData }) {
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-8 gap-4">
                     <div className="space-y-2 min-w-0 flex-1">
                         <p className="text-sm font-medium text-zinc-400 uppercase tracking-wider">Total Net Worth</p>
-                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight tabular-nums break-words leading-tight">
+                        <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight tabular-nums break-words leading-tight">
                             ${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </h2>
                     </div>
@@ -43,7 +43,7 @@ export function WalletCard({ initialData }: { initialData: WalletData }) {
                             </div>
                             <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide whitespace-nowrap">Available Balance</span>
                         </div>
-                        <p className="text-lg sm:text-xl font-bold text-white tabular-nums truncate" title={`$${initialData.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}>
+                        <p className="text-lg sm:text-xl font-bold text-white tabular-nums break-words" title={`$${initialData.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}>
                             ${initialData.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                         </p>
                     </div>
@@ -55,7 +55,7 @@ export function WalletCard({ initialData }: { initialData: WalletData }) {
                             </div>
                             <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide whitespace-nowrap">Portfolio Value</span>
                         </div>
-                        <p className="text-lg sm:text-xl font-bold text-white tabular-nums truncate" title={`$${initialData.portfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}>
+                        <p className="text-lg sm:text-xl font-bold text-white tabular-nums break-words" title={`$${initialData.portfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}>
                             ${initialData.portfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                         </p>
                     </div>
