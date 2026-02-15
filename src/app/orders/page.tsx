@@ -13,7 +13,7 @@ export default async function OrdersPage() {
         return <div>Please log in to view orders.</div>;
     }
 
-    const purchases = await prisma.purchase.findMany({
+    const purchases = await (prisma as any).purchase.findMany({
         where: {
             buyerId: session.user.id,
         },
