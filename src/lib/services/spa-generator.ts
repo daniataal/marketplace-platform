@@ -91,17 +91,24 @@ export class SpaGeneratorService {
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage' // Helps in containerized environments
-                ]
+                    '--disable-dev-shm-usage', // Helps in containerized environments
+                    '--disable-gpu',           // Disable GPU hardware acceleration
+                    '--no-gpu'                 // Redundant but safe
+                ],
+                dumpio: true, // Log browser stdout/stderr to process.stdout/stderr
+                ignoreHTTPSErrors: true
             };
 
             if (process.env.PUPPETEER_EXECUTABLE_PATH) {
                 // Only use the custom path if it actually exists
                 if (fs.existsSync(process.env.PUPPETEER_EXECUTABLE_PATH)) {
                     launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+                    console.log(`[SPA Generator] Using custom Chromium path: ${process.env.PUPPETEER_EXECUTABLE_PATH}`);
                 } else {
                     console.warn(`[SPA Generator] Custom executable path not found: ${process.env.PUPPETEER_EXECUTABLE_PATH}. Using default.`);
                 }
+            } else {
+                console.log(`[SPA Generator] No custom PUPPETEER_EXECUTABLE_PATH set. Using bundled Chromium.`);
             }
 
             await mdToPdf({ content: content }, {
