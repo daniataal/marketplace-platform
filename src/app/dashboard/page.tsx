@@ -55,18 +55,23 @@ export default async function Dashboard() {
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
                 {/* Wallet Section */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-                    <div className="md:col-span-5">
-                        <WalletCard initialData={walletData} />
-                    </div>
+                <div className="space-y-6">
+                    <WalletCard initialData={walletData} />
+                </div>
 
-                    {/* Placeholder for future Chart/Stats */}
-                    <div className="md:col-span-7 bg-card/10 backdrop-blur-xl border border-white/5 rounded-3xl p-12 min-h-[450px] flex items-center justify-center text-muted-foreground shadow-2xl overflow-hidden relative group">
+                {/* Secondary Stats Row */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="md:col-span-2 bg-card/10 backdrop-blur-xl border border-white/5 rounded-3xl p-8 min-h-[300px] flex items-center justify-center text-muted-foreground shadow-2xl relative overflow-hidden group">
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
                         <div className="relative z-10 flex flex-col items-center gap-4">
-                            <RefreshCcw className="w-12 h-12 text-muted-foreground/20 animate-spin-slow" />
-                            <p className="text-xl font-medium tracking-widest uppercase opacity-20">Market Intelligence</p>
+                            <RefreshCcw className="w-8 h-8 text-muted-foreground/20 animate-spin-slow" />
+                            <p className="text-sm font-medium tracking-widest uppercase opacity-20">Market Intelligence</p>
                         </div>
+                    </div>
+
+                    <div className="bg-card/10 backdrop-blur-xl border border-white/5 rounded-3xl p-8 flex flex-col items-center justify-center text-center space-y-2">
+                        <p className="text-4xl font-bold text-primary">{deals.length}</p>
+                        <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Active Listings</p>
                     </div>
                 </div>
 
