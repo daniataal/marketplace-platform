@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { User, LogOut, LayoutDashboard, Settings, ShoppingBag, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { signOut } from "next-auth/react";
+import { NotificationBell } from "./NotificationBell";
 
 export default function Navbar({ user }: { user: any }) {
     const pathname = usePathname();
@@ -13,32 +14,34 @@ export default function Navbar({ user }: { user: any }) {
     return (
         <nav className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Link href="/dashboard" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                            <span className="text-white font-bold">M</span>
+                <div className="flex items-center h-16">
+                    <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity h-10">
+                        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/25 border border-white/10 shrink-0">
+                            <span className="text-white font-black text-xl leading-none">M</span>
                         </div>
-                        <span className="text-xl font-bold text-foreground">Marketplace</span>
+                        <span className="text-xl font-black text-white uppercase tracking-wider leading-none">Marketplace</span>
                     </Link>
                 </div>
 
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-3 pl-6 border-l border-border relative">
-                        <div className="text-right hidden sm:block">
-                            <div className="text-sm font-medium text-foreground">{user?.name || "Trader"}</div>
-                            <div className="text-xs text-muted-foreground">{user?.email}</div>
-                        </div>
+                <div className="flex items-center gap-6 h-16">
+                    <div className="hidden lg:flex flex-col text-right border-r border-white/10 pr-6 h-10 justify-center">
+                        <span className="text-[13px] font-black text-white leading-none mb-1.5">{user?.name || "Trader"}</span>
+                        <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-none">{user?.email}</span>
+                    </div>
 
-                        <div className="relative">
+                    <div className="flex items-center gap-3 h-16">
+                        <NotificationBell />
+
+                        <div className="relative h-16 flex items-center">
                             <button
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center hover:ring-2 hover:ring-primary transition-all"
+                                className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center hover:bg-white/10 hover:ring-2 hover:ring-primary/50 transition-all shadow-xl group"
                             >
-                                <User className="w-5 h-5 text-secondary-foreground" />
+                                <User className="w-5 h-5 text-zinc-400 group-hover:text-white" />
                             </button>
 
                             {isProfileOpen && (
-                                <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-xl shadow-xl py-2 animate-in fade-in slide-in-from-top-2">
+                                <div className="absolute right-0 top-full mt-2 w-56 bg-card border border-border rounded-xl shadow-xl py-2 animate-in fade-in slide-in-from-top-2">
                                     <div className="px-4 py-2 border-b border-border mb-2">
                                         <p className="text-sm font-medium text-foreground">My Account</p>
                                     </div>

@@ -40,7 +40,6 @@ export async function depositFunds(amount: number, reference: string = "Manual D
     });
 
     if (!user) throw new Error("User not found");
-    // @ts-ignore - Check if wallet is frozen (property may be missing in types until regen)
     if (user.walletFrozen) throw new Error("Wallet is frozen. Cannot deposit funds.");
 
     try {
@@ -52,7 +51,6 @@ export async function depositFunds(amount: number, reference: string = "Manual D
             });
 
             // 2. Create Transaction Record
-            // @ts-ignore - Transaction model access (type issue)
             await tx.transaction.create({
                 data: {
                     userId: session.user.id!,
@@ -60,6 +58,17 @@ export async function depositFunds(amount: number, reference: string = "Manual D
                     amount: amount,
                     status: "COMPLETED",
                     reference: reference
+                }
+            });
+
+            // 3. Create Notification
+            await tx.notification.create({
+                data: {
+                    userId: session.user.id!,
+                    title: "Deposit Successful",
+                    message: `Your deposit of $${amount.toLocaleString()} has been processed successfully.`,
+                    type: "SUCCESS",
+                    link: "/dashboard"
                 }
             });
         });
@@ -97,7 +106,6 @@ export async function withdrawFunds(amount: number, iban: string) {
             });
 
             // 2. Create Transaction Record
-            // @ts-ignore - Transaction model access
             await tx.transaction.create({
                 data: {
                     userId: session.user.id!,
@@ -105,6 +113,17 @@ export async function withdrawFunds(amount: number, iban: string) {
                     amount: amount,
                     status: "PENDING", // Withdrawals often need approval
                     reference: `IBAN: ${iban}`
+                }
+            });
+
+            // 3. Create Notification
+            await tx.notification.create({
+                data: {
+                    userId: session.user.id!,
+                    title: "Withdrawal Requested",
+                    message: `Your withdrawal of $${amount.toLocaleString()} has been requested and is pending approval.`,
+                    type: "INFO",
+                    link: "/dashboard"
                 }
             });
         });
@@ -121,7 +140,6 @@ export async function getTransactions() {
     const session = await auth();
     if (!session?.user?.email) return [];
 
-    // @ts-ignore - Transaction model access
     return await prisma.transaction.findMany({
         where: { userId: session.user.id },
         orderBy: { createdAt: 'desc' },

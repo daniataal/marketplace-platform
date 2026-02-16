@@ -335,6 +335,17 @@ export async function adminAdjustBalance(userId: string, amount: number, reason:
                     reference: `Admin Adjustment: ${reason}`
                 }
             });
+
+            // Create Notification for the user
+            await (tx as any).notification.create({
+                data: {
+                    userId,
+                    title: amount >= 0 ? "Balance Credited" : "Balance Debited",
+                    message: `Admin has adjusted your balance by ${amount >= 0 ? '+' : ''}$${Math.abs(amount).toLocaleString()}. Reason: ${reason}`,
+                    type: amount >= 0 ? "SUCCESS" : "WARNING",
+                    link: "/dashboard"
+                }
+            });
         });
         revalidatePath("/admin/users");
     } catch (error) {
@@ -353,6 +364,20 @@ export async function updateKycStatus(userId: string, status: 'PENDING' | 'APPRO
             where: { id: userId },
             data: { kycStatus: status }
         });
+
+        // Create Notification
+        await (prisma as any).notification.create({
+            data: {
+                userId,
+                title: status === 'APPROVED' ? "KYC Approved" : "KYC Rejected",
+                message: status === 'APPROVED'
+                    ? "Congratulations! Your KYC verification has been approved. You can now trade on the platform."
+                    : "Your KYC verification has been rejected. Please check your documents and try again.",
+                type: status === 'APPROVED' ? "SUCCESS" : "ERROR",
+                link: "/dashboard/kyc"
+            }
+        });
+
         revalidatePath(`/admin/users`);
         revalidatePath(`/admin/users/${userId}`);
     } catch (error) {
@@ -497,6 +522,17 @@ export async function signPurchaseAgreement(purchaseId: string, spaData: any) {
                 status: "SIGNED",
                 spaData: spaData as any,
                 agreementDate: new Date()
+            }
+        });
+
+        // Notify user about signed agreement
+        await (prisma as any).notification.create({
+            data: {
+                userId: purchase.buyerId,
+                title: "Agreement Signed",
+                message: `The Sales & Purchase Agreement for your purchase of ${purchase.quantity}kg of gold has been signed.`,
+                type: "SUCCESS",
+                link: "/orders"
             }
         });
 

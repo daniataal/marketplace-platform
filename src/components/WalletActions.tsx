@@ -19,7 +19,7 @@ export function WalletActions() {
                 onClick={() => setIsDepositOpen(true)}
                 className="flex items-center gap-3 px-6 py-3 sm:py-4 bg-white/5 hover:bg-white/10 text-white rounded-[1.5rem] font-bold text-sm transition-all active:scale-95 border border-white/10 group/btn"
             >
-                <div className="flex -space-x-2">
+                <div className="flex items-center gap-2">
                     <div className="p-1.5 bg-primary/20 rounded-full text-primary border border-primary/20 group-hover/btn:rotate-12 transition-transform">
                         <Plus className="w-3 h-3" />
                     </div>

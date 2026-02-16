@@ -104,6 +104,17 @@ export async function POST(
                 });
             }
 
+            // 4. Create Notification
+            await (tx as any).notification.create({
+                data: {
+                    userId: session.user.id,
+                    title: "Purchase Successful",
+                    message: `You have successfully purchased ${quantity}kg of gold for $${totalCost.toLocaleString()}.`,
+                    type: "SUCCESS",
+                    link: "/orders"
+                }
+            });
+
             return { purchase, updatedDeal, soldOut: updatedDeal.availableQuantity <= 0 };
         });
 
