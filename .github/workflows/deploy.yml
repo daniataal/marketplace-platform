@@ -7,7 +7,7 @@ on:
 
 env:
   # Define image name - change 'myuser' to your Docker Hub username
-  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/marketplace-platform
+  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/doremarket
 
 jobs:
   # 2. Build and Push Docker Image
@@ -46,7 +46,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           source: "docker-compose.prod.yml,Caddyfile"
-          target: "~/marketplace-platform"
+          target: "~/DoreMarket"
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -68,8 +68,8 @@ jobs:
             fi
 
             # Create directory if missing
-            mkdir -p ~/marketplace-platform
-            cd ~/marketplace-platform
+            mkdir -p ~/DoreMarket
+            cd ~/DoreMarket
             
             # Rename prod compose to standard name
             mv docker-compose.prod.yml docker-compose.yml
