@@ -55,14 +55,18 @@ export default async function Dashboard() {
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
                 {/* Wallet Section */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="md:col-span-1">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                    <div className="md:col-span-5">
                         <WalletCard initialData={walletData} />
                     </div>
 
                     {/* Placeholder for future Chart/Stats */}
-                    <div className="md:col-span-2 bg-card/30 backdrop-blur-md border border-border/50 rounded-2xl p-6 min-h-[200px] flex items-center justify-center text-muted-foreground">
-                        Market Trends Chart (Coming Soon)
+                    <div className="md:col-span-7 bg-card/10 backdrop-blur-xl border border-white/5 rounded-3xl p-12 min-h-[450px] flex items-center justify-center text-muted-foreground shadow-2xl overflow-hidden relative group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+                        <div className="relative z-10 flex flex-col items-center gap-4">
+                            <RefreshCcw className="w-12 h-12 text-muted-foreground/20 animate-spin-slow" />
+                            <p className="text-xl font-medium tracking-widest uppercase opacity-20">Market Intelligence</p>
+                        </div>
                     </div>
                 </div>
 
