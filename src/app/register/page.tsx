@@ -26,10 +26,12 @@ export default function RegisterPage() {
 
                 <div className="bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8">
                     <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-xl mb-4 shadow-lg shadow-primary/20">
-                            <span className="text-white font-bold text-xl">M</span>
+                        <div className="flex items-center justify-center font-dancing text-2xl font-bold tracking-tight">
+                            <span className="text-5xl text-primary">Dore</span>
+                            <span className="text-5xl text-white/30">&</span>
+                            <span className="text-5xl text-white">Market</span>
                         </div>
-                        <h1 className="text-2xl font-bold text-foreground">Create Account</h1>
+                        <h1 className="mt-5 text-2xl font-bold text-foreground">Create Account</h1>
                         <p className="text-muted-foreground mt-2 text-sm">Join the exclusive marketplace</p>
                     </div>
 

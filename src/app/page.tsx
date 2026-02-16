@@ -6,11 +6,11 @@ export default function LandingPage() {
             <header className="px-6 lg:px-8 h-16 flex items-center justify-between border-b border-white/5">
                 <div className="flex items-center font-dancing text-3xl font-bold tracking-tight group cursor-default">
                     <span className="text-primary">Dore</span>
-                    <span className="mx-2 text-white/30">&</span>
+                    <span className="text-white/30">&</span>
                     <span className="text-white">Market</span>
                 </div>
                 <nav className="flex gap-4">
-                    <Link href="/login" className="text-sm font-medium hover:text-primary transition-colors">
+                    <Link href="/login" className="mt-2 text-sm font-medium hover:text-primary transition-colors">
                         Login
                     </Link>
                     <Link href="/register" className="text-sm font-medium bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors">

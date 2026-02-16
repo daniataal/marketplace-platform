@@ -14,7 +14,7 @@ export default function AdminLayout({
                 <div className="p-6 border-b border-border">
                     <div className="flex items-center font-dancing text-2xl font-bold tracking-tight">
                         <span className="text-primary">Dore</span>
-                        <span className="mx-2 text-white/30">&</span>
+                        <span className="text-white/30">&</span>
                         <span className="text-white">Market</span>
                     </div>
                 </div>
