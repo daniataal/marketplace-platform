@@ -52,12 +52,12 @@ export function MarketIntelligence({ currentPrice }: { currentPrice: number }) {
     const isPositive = data.change24h >= 0;
 
     return (
-        <div className="bg-zinc-900/50 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group h-full flex flex-col">
+        <div className="bg-card/10 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group max-h-[500px] flex flex-col">
             {/* Background Ambient Glow */}
             <div className={`absolute top-0 right-0 w-64 h-64 ${isPositive ? 'bg-emerald-500/10' : 'bg-rose-500/10'} rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 transition-colors duration-1000`} />
 
-            <div className="relative z-10 flex flex-col h-full">
-                <div className="flex items-center justify-between mb-8">
+            <div className="relative z-10 flex flex-col">
+                <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                         <div className="p-2.5 rounded-2xl bg-primary/10 text-primary border border-primary/20">
                             <Activity className="w-5 h-5" />
@@ -67,13 +67,13 @@ export function MarketIntelligence({ currentPrice }: { currentPrice: number }) {
                             <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-tight">Real-time Terminal</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800/50 border border-white/5 backdrop-blur-md">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/20 border border-white/5 backdrop-blur-md">
                         <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isPositive ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'}`} />
                         <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Live Feed</span>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-8 mb-8">
+                <div className="grid grid-cols-2 gap-8 mb-6">
                     <div className="space-y-1">
                         <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest opacity-50">24h Performance</p>
                         <div className={`flex items-center gap-2 ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
@@ -97,7 +97,7 @@ export function MarketIntelligence({ currentPrice }: { currentPrice: number }) {
                 </div>
 
                 {/* Animated Sparkline */}
-                <div className="relative flex-grow min-h-[120px] mb-8 bg-zinc-950/30 rounded-[2rem] border border-white/5 overflow-hidden flex items-end">
+                <div className="relative h-[140px] mb-6 bg-card/20 rounded-[2rem] border border-white/5 overflow-hidden flex items-end">
                     <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                         <defs>
                             <linearGradient id="chart-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -133,30 +133,29 @@ export function MarketIntelligence({ currentPrice }: { currentPrice: number }) {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="p-5 rounded-2xl bg-zinc-800/10 border border-white/5 space-y-2 hover:bg-zinc-800/20 transition-colors group/stat">
+                    <div className="p-4 rounded-2xl bg-card/10 border border-white/5 space-y-2 hover:bg-card/20 transition-colors group/stat">
                         <div className="flex items-center justify-between">
                             <p className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">Day High</p>
                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/20 group-hover/stat:bg-emerald-500/40 transition-colors" />
                         </div>
-                        <p className="text-base font-bold text-white tabular-nums">${data.high24h.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                        <p className="text-sm font-bold text-white tabular-nums">${data.high24h.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
                     </div>
-                    <div className="p-5 rounded-2xl bg-zinc-800/10 border border-white/5 space-y-2 hover:bg-zinc-800/20 transition-colors group/stat">
+                    <div className="p-4 rounded-2xl bg-card/10 border border-white/5 space-y-2 hover:bg-card/20 transition-colors group/stat">
                         <div className="flex items-center justify-between">
                             <p className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">Day Low</p>
                             <div className="w-1.5 h-1.5 rounded-full bg-rose-500/20 group-hover/stat:bg-rose-500/40 transition-colors" />
                         </div>
-                        <p className="text-base font-bold text-white tabular-nums">${data.low24h.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                        <p className="text-sm font-bold text-white tabular-nums">${data.low24h.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
                     </div>
                 </div>
 
-                <div className="mt-8 pt-8 border-t border-white/5">
+                <div className="mt-6 pt-6 border-t border-white/5">
                     <div className="flex items-start gap-4">
-                        <div className="p-2 rounded-lg bg-zinc-800/50">
+                        <div className="p-2 rounded-lg bg-card/20">
                             <Info className="w-4 h-4 text-zinc-500" />
                         </div>
                         <p className="text-[11px] font-medium leading-[1.6] text-zinc-400">
                             Market summary: Current price action is <span className="text-white font-bold">{data.sentiment.toLowerCase()}</span>.
-                            Institutional volume is concentrated at <span className="text-white font-bold">${data.low24h.toFixed(0)}</span> support levels.
                             Expect <span className="text-white font-bold">{data.volatility.toLowerCase()}</span> volatility for the upcoming European session.
                         </p>
                     </div>
