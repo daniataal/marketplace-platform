@@ -6,6 +6,7 @@ import { getWalletData } from "@/actions/wallet";
 import { WalletCard } from "@/components/WalletCard";
 import { RefreshCcw } from "lucide-react";
 import { GoldPriceService } from "@/lib/services/gold-price";
+import { MarketIntelligence } from "@/components/MarketIntelligence";
 
 export const dynamic = 'force-dynamic';
 
@@ -61,19 +62,31 @@ export default async function Dashboard() {
 
                 {/* Secondary Stats Row */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="md:col-span-2 bg-card/10 backdrop-blur-xl border border-white/5 rounded-3xl p-8 min-h-[300px] flex items-center justify-center text-muted-foreground shadow-2xl relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-                        <div className="relative z-10 flex flex-col items-center gap-4">
-                            <RefreshCcw className="w-8 h-8 text-muted-foreground/20 animate-spin-slow" />
-                            <p className="text-sm font-medium tracking-widest uppercase opacity-20">Market Intelligence</p>
-                        </div>
+                    <div className="md:col-span-2">
+                        <MarketIntelligence currentPrice={livePrice} />
                     </div>
 
-                    <div className="bg-card/10 backdrop-blur-xl border border-white/5 rounded-3xl p-8 flex flex-col items-center justify-center text-center space-y-2">
-                        <p className="text-4xl font-bold text-primary">{deals.length}</p>
-                        <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Active Listings</p>
+                    <div className="bg-zinc-900/50 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center space-y-4 relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700" />
+
+                        <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/20 group-hover:scale-110 transition-transform duration-500">
+                            <span className="text-2xl">💎</span>
+                        </div>
+
+                        <div className="space-y-1">
+                            <p className="text-4xl font-black text-white tabular-nums tracking-tighter shadow-primary/20 drop-shadow-sm">{deals.length}</p>
+                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Active Listings</p>
+                        </div>
+
+                        <div className="pt-2">
+                            <div className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Market Open</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
 
                 <div>
                     <div className="flex justify-between items-center mb-6">
