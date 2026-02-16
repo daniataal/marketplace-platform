@@ -12,11 +12,10 @@ export default function AdminLayout({
             {/* Sidebar */}
             <aside className="w-64 bg-card border-r border-border flex flex-col">
                 <div className="p-6 border-b border-border">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20">
-                            <span className="text-primary font-serif font-black">Dore & Market</span>
-                        </div>
-                        <span className="text-xl font-dancing font-bold text-primary">Dore & Market</span>
+                    <div className="flex items-center font-dancing text-2xl font-bold tracking-tight">
+                        <span className="text-primary">Dore</span>
+                        <span className="mx-2 text-white/30">&</span>
+                        <span className="text-white">Market</span>
                     </div>
                 </div>
 
