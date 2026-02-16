@@ -20,12 +20,26 @@ export function MarketIntelligence({ currentPrice }: { currentPrice: number }) {
 
     useEffect(() => {
         const basePrice = currentPrice;
-        const mockChange = (Math.random() * 2 - 1) * 0.005 * basePrice;
+
+        // Pseudo-random generator seeded by the price to ensure stability
+        const seededRandom = (seed: number) => {
+            const x = Math.sin(seed) * 10000;
+            return x - Math.floor(x);
+        };
+
+        // Use the price as a seed (integer part)
+        const seed = Math.floor(basePrice * 100);
+        const r1 = seededRandom(seed);
+        const r2 = seededRandom(seed + 1);
+        const r3 = seededRandom(seed + 2);
+
+        const mockChangePercent = (r1 * 2 - 1) * 0.6; // +/- 0.6%
+        const mockChange = (mockChangePercent / 100) * basePrice;
 
         // Generate a stable smooth path for the sparkline
         const points = Array.from({ length: 10 }, (_, i) => ({
             x: (i / 9) * 100,
-            y: 30 + Math.random() * 40
+            y: 30 + seededRandom(seed + i + 10) * 40
         }));
 
         // Ensure last point matches sentiment
@@ -37,10 +51,10 @@ export function MarketIntelligence({ currentPrice }: { currentPrice: number }) {
         setData({
             price: basePrice,
             change24h: mockChange,
-            changePercent24h: (mockChange / basePrice) * 100,
-            high24h: basePrice * (1 + Math.random() * 0.01),
-            low24h: basePrice * (1 - Math.random() * 0.01),
-            volatility: Math.random() > 0.7 ? 'High' : 'Medium',
+            changePercent24h: mockChangePercent,
+            high24h: basePrice * (1 + Math.abs(r2) * 0.008),
+            low24h: basePrice * (1 - Math.abs(r3) * 0.008),
+            volatility: r1 > 0.7 ? 'High' : r1 > 0.3 ? 'Medium' : 'Low',
             sentiment: mockChange > 0 ? 'Bullish' : 'Bearish',
             path,
             areaPath
