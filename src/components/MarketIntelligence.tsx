@@ -68,7 +68,7 @@ export function MarketIntelligence({ currentPrice }: { currentPrice: number }) {
     return (
         <div className="bg-card/10 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group max-h-[500px] flex flex-col">
             {/* Background Ambient Glow */}
-            <div className={`absolute top-0 right-0 w-64 h-64 ${isPositive ? 'bg-emerald-500/10' : 'bg-rose-500/10'} rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 transition-colors duration-1000`} />
+            <div className={`absolute top-0 right-0 w-64 h-64 ${isPositive ? 'bg-amber-500/10' : 'bg-rose-500/10'} rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 transition-colors duration-1000`} />
 
             <div className="relative z-10 flex flex-col">
                 <div className="flex items-center justify-between mb-6">
@@ -82,7 +82,7 @@ export function MarketIntelligence({ currentPrice }: { currentPrice: number }) {
                         </div>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/20 border border-white/5 backdrop-blur-md">
-                        <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isPositive ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'}`} />
+                        <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isPositive ? 'bg-amber-500 shadow-[0_0_8px_#f59e0b]' : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'}`} />
                         <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Live Feed</span>
                     </div>
                 </div>
@@ -90,8 +90,8 @@ export function MarketIntelligence({ currentPrice }: { currentPrice: number }) {
                 <div className="grid grid-cols-2 gap-8 mb-6">
                     <div className="space-y-1">
                         <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest opacity-50">24h Performance</p>
-                        <div className={`flex items-center gap-2 ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
-                            <div className={`p-1 rounded-lg ${isPositive ? 'bg-emerald-500/10' : 'bg-rose-500/10'}`}>
+                        <div className={`flex items-center gap-2 ${isPositive ? 'text-amber-500' : 'text-rose-500'}`}>
+                            <div className={`p-1 rounded-lg ${isPositive ? 'bg-amber-500/10' : 'bg-rose-500/10'}`}>
                                 {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                             </div>
                             <span className="text-2xl font-black tabular-nums tracking-tight">
@@ -115,8 +115,8 @@ export function MarketIntelligence({ currentPrice }: { currentPrice: number }) {
                     <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                         <defs>
                             <linearGradient id="chart-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stopColor={isPositive ? '#10b981' : '#f43f5e'} stopOpacity="0.2" />
-                                <stop offset="100%" stopColor={isPositive ? '#10b981' : '#f43f5e'} stopOpacity="0" />
+                                <stop offset="0%" stopColor={isPositive ? '#f59e0b' : '#f43f5e'} stopOpacity="0.2" />
+                                <stop offset="100%" stopColor={isPositive ? '#f59e0b' : '#f43f5e'} stopOpacity="0" />
                             </linearGradient>
                         </defs>
                         <path
@@ -127,11 +127,11 @@ export function MarketIntelligence({ currentPrice }: { currentPrice: number }) {
                         <path
                             d={data.path}
                             fill="none"
-                            stroke={isPositive ? '#10b981' : '#f43f5e'}
+                            stroke={isPositive ? '#f59e0b' : '#f43f5e'}
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            className="transition-all duration-1000 ease-in-out drop-shadow-[0_0_12px_rgba(16,185,129,0.3)]"
+                            className="transition-all duration-1000 ease-in-out drop-shadow-[0_0_12px_rgba(245,158,11,0.45)]"
                         />
                     </svg>
                     <div className="absolute top-4 left-4 flex gap-4">
@@ -150,7 +150,7 @@ export function MarketIntelligence({ currentPrice }: { currentPrice: number }) {
                     <div className="p-4 rounded-2xl bg-card/10 border border-white/5 space-y-2 hover:bg-card/20 transition-colors group/stat">
                         <div className="flex items-center justify-between">
                             <p className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">Day High</p>
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/20 group-hover/stat:bg-emerald-500/40 transition-colors" />
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500/20 group-hover/stat:bg-amber-500/40 transition-colors" />
                         </div>
                         <p className="text-sm font-bold text-white tabular-nums">${data.high24h.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
                     </div>
