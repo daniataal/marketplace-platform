@@ -20,6 +20,7 @@ export default function CreateDealPage() {
     const [fixedPrice, setFixedPrice] = useState<number | ''>('');
     const [quantity, setQuantity] = useState<number | ''>('');
     const [incoterms, setIncoterms] = useState('CIF');
+    const [frequency, setFrequency] = useState('SPOT');
 
     // Market Data
     const [marketPrice, setMarketPrice] = useState(0);
@@ -47,6 +48,9 @@ export default function CreateDealPage() {
     const calculatedPrice = pricingModel === 'FIXED'
         ? (fixedPrice === '' ? 0 : fixedPrice)
         : (marketPrice * purity) * (1 - discount / 100);
+
+    const multipliers = { SPOT: 1, WEEKLY: 52, BIWEEKLY: 26, MONTHLY: 12, QUARTERLY: 4 };
+    const totalAnnualQuantity = typeof quantity === 'number' ? quantity * (multipliers[frequency as keyof typeof multipliers] || 1) : 0;
 
     // Fetch initial market price and sellers
     useEffect(() => {
@@ -346,6 +350,34 @@ export default function CreateDealPage() {
                                         className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50"
                                         placeholder="0.00"
                                     />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="frequency">Deal Frequency</label>
+                                    <select
+                                        name="frequency"
+                                        id="frequency"
+                                        value={frequency}
+                                        onChange={(e) => setFrequency(e.target.value)}
+                                        className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none cursor-pointer"
+                                    >
+                                        <option value="SPOT">One-time Deal (Spot)</option>
+                                        <option value="WEEKLY">Weekly Supply</option>
+                                        <option value="BIWEEKLY">Bi-weekly Supply</option>
+                                        <option value="MONTHLY">Monthly Supply</option>
+                                        <option value="QUARTERLY">Quarterly Supply</option>
+                                    </select>
+                                    {frequency !== 'SPOT' && (
+                                        <div className="mt-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                                            <div className="text-xs font-bold text-primary flex justify-between items-center">
+                                                <span>Annual Commitment</span>
+                                                <span className="text-sm">{totalAnnualQuantity.toLocaleString()} kg / Year</span>
+                                            </div>
+                                            <p className="text-[10px] text-muted-foreground mt-1">
+                                                * 1 Year Contract with 5 Years rolling extensions
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

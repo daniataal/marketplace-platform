@@ -305,6 +305,20 @@ export async function createDeal(
     const cfIcon = (formData.get("cfIcon") as string) || "gold-bar";
     const cfOriginPort = (formData.get("cfOriginPort") as string) || "Kampala";
     const incoterms = (formData.get("incoterms") as string) || "CIF";
+    const frequency = (formData.get("frequency") as string) || "SPOT";
+    const contractDuration = parseInt(formData.get("contractDuration") as string) || (frequency === 'SPOT' ? 0 : 1);
+    const extensionYears = parseInt(formData.get("extensionYears") as string) || 5;
+
+    let totalQuantity = quantity;
+    if (frequency !== 'SPOT') {
+        const multipliers: { [key: string]: number } = {
+            'WEEKLY': 52,
+            'BIWEEKLY': 26,
+            'MONTHLY': 12,
+            'QUARTERLY': 4
+        };
+        totalQuantity = quantity * (multipliers[frequency] || 1) * contractDuration;
+    }
 
     // Seller fields
     const sellerAddress = formData.get("sellerAddress") as string;
@@ -372,6 +386,10 @@ export async function createDeal(
                 cfIcon,
                 cfOriginPort,
                 incoterms,
+                frequency,
+                totalQuantity,
+                contractDuration,
+                extensionYears,
                 // Seller fields
                 sellerAddress,
                 sellerTradeLicense,
@@ -429,6 +447,20 @@ export async function updateDeal(
     const quantity = parseFloat(formData.get("quantity") as string);
     const discount = parseFloat(formData.get("discount") as string);
     const incoterms = (formData.get("incoterms") as string) || "CIF";
+    const frequency = (formData.get("frequency") as string) || "SPOT";
+    const contractDuration = parseInt(formData.get("contractDuration") as string) || (frequency === 'SPOT' ? 0 : 1);
+    const extensionYears = parseInt(formData.get("extensionYears") as string) || 5;
+
+    let totalQuantity = quantity;
+    if (frequency !== 'SPOT') {
+        const multipliers: { [key: string]: number } = {
+            'WEEKLY': 52,
+            'BIWEEKLY': 26,
+            'MONTHLY': 12,
+            'QUARTERLY': 4
+        };
+        totalQuantity = quantity * (multipliers[frequency] || 1) * contractDuration;
+    }
 
     // Crowdfunding params
     const cfRisk = formData.get("cfRisk") as string;
@@ -501,6 +533,10 @@ export async function updateDeal(
                 cfOriginPort,
                 cfTransportMethod,
                 cfIcon,
+                frequency,
+                totalQuantity,
+                contractDuration,
+                extensionYears,
                 // Update Seller fields
                 sellerAddress,
                 sellerTradeLicense,
