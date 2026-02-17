@@ -5,10 +5,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: dev
     container_name: DoreMarket_app
     restart: always
     ports:
       - "3001:3001"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - /app/.next
     # Add DNS servers to fix external API resolution
     dns:
       - 8.8.8.8      # Google DNS
@@ -42,7 +47,7 @@ services:
     depends_on:
       - db
     # Run migrations/seeding on start
-    command: sh -c "node node_modules/prisma/build/index.js db push --accept-data-loss && node scripts/seed-admin.js && node server.js"
+    command: sh -c "npx prisma generate && npx prisma db push --accept-data-loss && node scripts/seed-admin.js && npm run dev"
     
   db:
     image: postgres:15-alpine

@@ -12,6 +12,9 @@ export const dynamic = 'force-dynamic';
 
 export default async function Dashboard() {
     const session = await auth();
+    const user = session?.user?.email
+        ? await prisma.user.findUnique({ where: { email: session.user.email } })
+        : session?.user;
     const walletData = await getWalletData();
     const dealsData = await prisma.deal.findMany({
         orderBy: { createdAt: 'desc' },
@@ -116,7 +119,7 @@ export default async function Dashboard() {
                                     deal={deal}
                                     userBalance={walletData.balance}
                                     sellerConfig={sellerConfig}
-                                    userInfo={session?.user}
+                                    userInfo={user}
                                 />
                             ))
                         )}

@@ -11,6 +11,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 
 # Rebuild the source code only when needed
+# Rebuild the source code only when needed
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -21,6 +22,14 @@ RUN npx prisma generate
 # Build the application
 ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
+
+# Development image
+FROM base AS dev
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+# Copy source but rely on volume for updates
+COPY . .
+CMD ["npm", "run", "dev"]
 
 # Production runner
 FROM base AS runner

@@ -16,6 +16,9 @@ interface DealProps {
         status: string;
         deliveryLocation: string;
         incoterms: string;
+        origin?: string;
+        cfOrigin?: string;
+        originport?: string;
     };
     onBuy: (deal: any) => void;
 }
@@ -107,7 +110,7 @@ export function DealCard({ deal, onBuy }: DealProps) {
                     <div className="flex gap-2 mb-6 mt-auto">
                         <div className="flex items-center gap-1 px-2 py-1 bg-secondary/50 rounded text-xs text-muted-foreground">
                             <MapPin className="w-3 h-3" />
-                            Origin: {deal.deliveryLocation}
+                            Origin: {deal.cfOrigin || deal.origin || 'Unknown'}
                         </div>
                         <div className="flex items-center gap-1 px-2 py-1 bg-secondary/50 rounded text-xs text-muted-foreground">
                             <FileText className="w-3 h-3" />

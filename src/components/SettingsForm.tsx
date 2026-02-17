@@ -27,6 +27,60 @@ export default function SettingsForm({ user }: { user: any }) {
                     </div>
                 </div>
                 <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="phoneNumber">Phone Number</label>
+                    <input
+                        type="tel"
+                        name="phoneNumber"
+                        id="phoneNumber"
+                        defaultValue={user?.phoneNumber || ''}
+                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50"
+                        placeholder="+1 234 567 8900"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="nationality">Nationality</label>
+                    <input
+                        type="text"
+                        name="nationality"
+                        id="nationality"
+                        defaultValue={user?.nationality || ''}
+                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50"
+                        placeholder="e.g. United Arab Emirates"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="address">Full Address</label>
+                    <input
+                        type="text"
+                        name="address"
+                        id="address"
+                        defaultValue={user?.address || ''}
+                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50"
+                        placeholder="Street, City, Country"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="passportNumber">Passport Number</label>
+                    <input
+                        type="text"
+                        name="passportNumber"
+                        id="passportNumber"
+                        defaultValue={user?.passportNumber || ''}
+                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50"
+                        placeholder="Enter passport number"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="passportExpiry">Passport Expiration Date</label>
+                    <input
+                        type="date"
+                        name="passportExpiry"
+                        id="passportExpiry"
+                        defaultValue={user?.passportExpiry || ''}
+                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50"
+                    />
+                </div>
+                <div>
                     <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="password">New Password</label>
                     <input
                         type="password"

@@ -30,8 +30,19 @@ model Deal {
   cfDuration        Int         @default(12) // Campaign duration in months
   cfMinInvestment   Float       @default(500) // Minimum investment amount
   cfOrigin          String      @default("Africa") // Origin location
+  cfOriginPort      String      @default("Kampala") // Origin Port
   cfTransportMethod String      @default("Air Freight") // Transport method
   cfIcon            String      @default("gold-bar") // Icon for crowdfunding listing
+  
+  // Seller attributes for SPA
+  sellerAddress         String?
+  sellerTradeLicense    String?
+  sellerRepresentative  String?
+  sellerPassportNumber  String?
+  sellerPassportExpiry  String?
+  sellerCountry         String?
+  sellerTelephone       String?
+  sellerEmail           String?
   
   crowdfundingId    String?
   buyerId           String?
@@ -60,7 +71,9 @@ model User {
   firstName     String?
   lastName      String?
   address       String?
+  phoneNumber   String?
   passportNumber String?
+  passportExpiry String? // ISO date string or similar
   nationality   String?
   kycDocuments  Json?     // Store URLs or metadata for uploaded docs
   
@@ -176,3 +189,22 @@ model PendingExport {
   @@index([status])
 }
 
+
+model SellerIdentity {
+  id                String   @id @default(cuid())
+  alias             String?  // Internal name
+  companyName       String
+  logo              String?  // URL to logo image
+  originCountry     String?
+  originPort        String?
+  address           String?
+  tradeLicense      String?
+  representative    String?
+  passportNumber    String?
+  passportExpiry    String?
+  country           String?
+  telephone         String?
+  email             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}

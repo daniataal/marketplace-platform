@@ -29,6 +29,7 @@ export default function EditDealForm({ deal }: { deal: any }) {
     const [fixedPrice, setFixedPrice] = useState<number | ''>(deal.pricingModel === 'FIXED' ? deal.pricePerKg : '');
     const [marketPrice, setMarketPrice] = useState(0);
     const [quantity, setQuantity] = useState(deal.quantity || 0);
+    const [incoterms, setIncoterms] = useState(deal.incoterms || 'CIF');
 
     const fetchPrice = async () => {
         const price = await getLiveGoldPrice();
@@ -98,20 +99,43 @@ export default function EditDealForm({ deal }: { deal: any }) {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Origin Location</label>
-                                    <div className="relative">
-                                        <input
-                                            name="deliveryLocation"
-                                            defaultValue={deal.deliveryLocation || 'Dubai'}
-                                            type="text"
-                                            required
-                                            className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all pl-10"
-                                            placeholder="e.g. Dubai, Ghana, London"
-                                        />
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">📍</span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mt-1">Where the commodity is currently located</p>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Transaction Terms</label>
+                                    <select
+                                        name="incoterms"
+                                        value={incoterms}
+                                        onChange={(e) => setIncoterms(e.target.value)}
+                                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none cursor-pointer"
+                                    >
+                                        <option value="CIF">CIF - Cost, Insurance & Freight</option>
+                                        <option value="FOB">FOB - Free On Board</option>
+                                        <option value="EXW">EXW - Ex Works / Cash & Carry</option>
+                                    </select>
                                 </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {incoterms !== 'CIF' ? (
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2 text-muted-foreground">
+                                            {incoterms === 'FOB' ? 'FOB Point / Trading Hub' : 'Pickup Location / Trading Hub'}
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                name="deliveryLocation"
+                                                defaultValue={deal.deliveryLocation || 'Dubai'}
+                                                type="text"
+                                                required
+                                                className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all pl-10"
+                                                placeholder="e.g. Dubai, Ghana, London"
+                                            />
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">📍</span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mt-1">Where the commodity is currently located</p>
+                                    </div>
+                                ) : (
+                                    <input type="hidden" name="deliveryLocation" value={deal.deliveryLocation || 'Dubai'} />
+                                )}
+
                                 <div>
                                     <label className="block text-sm font-medium mb-2 text-muted-foreground">Quantity (kg)</label>
                                     <input
@@ -241,6 +265,118 @@ export default function EditDealForm({ deal }: { deal: any }) {
                                             </div>
                                         </>
                                     )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Seller & Origin Config */}
+                        <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
+                            <h2 className="text-xl font-semibold mb-4">Seller & Origin Details (SPA)</h2>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Country of Origin (Mined)</label>
+                                    <input
+                                        name="cfOrigin"
+                                        defaultValue={deal.cfOrigin}
+                                        type="text"
+                                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        placeholder="e.g. Uganda"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Port of Origin (Export)</label>
+                                    <input
+                                        name="cfOriginPort"
+                                        defaultValue={deal.cfOriginPort}
+                                        type="text"
+                                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        placeholder="e.g. Kampala"
+                                    />
+                                </div>
+
+                                <div className="col-span-full">
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Seller Address</label>
+                                    <input
+                                        name="sellerAddress"
+                                        defaultValue={deal.sellerAddress}
+                                        type="text"
+                                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        placeholder="Business Address"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Trade License No.</label>
+                                    <input
+                                        name="sellerTradeLicense"
+                                        defaultValue={deal.sellerTradeLicense}
+                                        type="text"
+                                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        placeholder="License Number"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Representative Name</label>
+                                    <input
+                                        name="sellerRepresentative"
+                                        defaultValue={deal.sellerRepresentative}
+                                        type="text"
+                                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        placeholder="Full Name"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Passport Number</label>
+                                    <input
+                                        name="sellerPassportNumber"
+                                        defaultValue={deal.sellerPassportNumber}
+                                        type="text"
+                                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        placeholder="Passport No."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Passport Expiry</label>
+                                    <input
+                                        name="sellerPassportExpiry"
+                                        defaultValue={deal.sellerPassportExpiry}
+                                        type="text"
+                                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        placeholder="DD/MM/YYYY"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Seller Country</label>
+                                    <input
+                                        name="sellerCountry"
+                                        defaultValue={deal.sellerCountry}
+                                        type="text"
+                                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        placeholder="Country"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Seller Phone</label>
+                                    <input
+                                        name="sellerTelephone"
+                                        defaultValue={deal.sellerTelephone}
+                                        type="text"
+                                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        placeholder="+123..."
+                                    />
+                                </div>
+                                <div className="col-span-full">
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Seller Email</label>
+                                    <input
+                                        name="sellerEmail"
+                                        defaultValue={deal.sellerEmail}
+                                        type="email"
+                                        className="w-full p-3 bg-secondary/50 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        placeholder="email@company.com"
+                                    />
                                 </div>
                             </div>
                         </div>

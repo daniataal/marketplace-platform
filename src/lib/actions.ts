@@ -7,6 +7,8 @@ import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { GoldPriceService } from "./services/gold-price";
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
 
 // Helper for UI to get current price
 export async function getLiveGoldPrice() {
@@ -84,15 +86,37 @@ export async function updateProfile(
     }
 
     const name = formData.get("name") as string;
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const address = formData.get("address") as string;
+    const nationality = formData.get("nationality") as string;
+    const passportNumber = formData.get("passportNumber") as string;
+    const passportExpiry = formData.get("passportExpiry") as string;
+    const phoneNumber = formData.get("phoneNumber") as string;
     const password = formData.get("password") as string;
     const currentEmail = session.user.email;
 
     try {
-        const data: { name?: string; password?: string } = {};
+        const data: {
+            name?: string;
+            firstName?: string;
+            lastName?: string;
+            address?: string;
+            phoneNumber?: string;
+            nationality?: string;
+            passportNumber?: string;
+            passportExpiry?: string;
+            password?: string
+        } = {};
 
-        if (name && name.length > 0) {
-            data.name = name;
-        }
+        if (name) data.name = name;
+        if (firstName) data.firstName = firstName;
+        if (lastName) data.lastName = lastName;
+        if (address) data.address = address;
+        if (phoneNumber) data.phoneNumber = phoneNumber;
+        if (nationality) data.nationality = nationality;
+        if (passportNumber) data.passportNumber = passportNumber;
+        if (passportExpiry) data.passportExpiry = passportExpiry;
 
         if (password && password.length > 0) {
             if (password.length < 6) return "Password must be at least 6 characters";
@@ -108,6 +132,7 @@ export async function updateProfile(
             data,
         });
 
+        revalidatePath("/settings");
         return "Profile updated successfully";
     } catch (error) {
         console.error("Profile update error:", error);
@@ -115,13 +140,151 @@ export async function updateProfile(
     }
 }
 
-export async function createDeal(
-    prevState: string | undefined,
-    formData: FormData,
-): Promise<string | undefined> {
+
+export async function getSellerIdentities() {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+        throw new Error("Unauthorized");
+    }
+
+    try {
+        const sellers = await prisma.sellerIdentity.findMany({
+            orderBy: { companyName: 'asc' }
+        });
+        return sellers;
+    } catch (error) {
+        console.error("Failed to fetch seller identities", error);
+        return [];
+    }
+}
+
+export async function createSeller(prevState: string | undefined, formData: FormData) {
     const session = await auth();
     if (session?.user?.role !== 'ADMIN') {
         return "Unauthorized";
+    }
+
+    try {
+        let logo = formData.get('logo') as string;
+        const logoFile = formData.get('logoFile') as any;
+
+        if (logoFile && typeof logoFile === 'object' && logoFile.size > 0) {
+            const buffer = Buffer.from(await logoFile.arrayBuffer());
+            const filename = `${Date.now()}-${logoFile.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
+            const uploadDir = path.join(process.cwd(), 'public/uploads/sellers');
+
+            await mkdir(uploadDir, { recursive: true });
+            await writeFile(path.join(uploadDir, filename), buffer);
+
+            logo = `/uploads/sellers/${filename}`;
+        }
+
+        await prisma.sellerIdentity.create({
+            data: {
+                companyName: formData.get('companyName') as string,
+                alias: formData.get('alias') as string,
+                logo: logo,
+                originCountry: formData.get('originCountry') as string,
+                originPort: formData.get('originPort') as string,
+                address: formData.get('address') as string,
+                tradeLicense: formData.get('tradeLicense') as string,
+                representative: formData.get('representative') as string,
+                passportNumber: formData.get('passportNumber') as string,
+                passportExpiry: formData.get('passportExpiry') as string,
+                country: formData.get('country') as string,
+                telephone: formData.get('telephone') as string,
+                email: formData.get('email') as string,
+            }
+        });
+    } catch (error) {
+        console.error("Failed to create seller:", error);
+        return "Failed to create seller profile.";
+    }
+
+    redirect('/admin/deals/create');
+}
+
+export async function getSellerIdentity(id: string) {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') return null;
+    try {
+        return await prisma.sellerIdentity.findUnique({ where: { id } });
+    } catch (error) {
+        console.error("Failed to fetch seller:", error);
+        return null;
+    }
+}
+
+export async function updateSeller(id: string, prevState: any, formData: FormData) {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+        return "Unauthorized";
+    }
+
+    try {
+        let logo = formData.get('logo') as string;
+        const logoFile = formData.get('logoFile') as any;
+
+        if (logoFile && typeof logoFile === 'object' && logoFile.size > 0) {
+            const buffer = Buffer.from(await logoFile.arrayBuffer());
+            const filename = `${Date.now()}-${logoFile.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
+            const uploadDir = path.join(process.cwd(), 'public/uploads/sellers');
+
+            await mkdir(uploadDir, { recursive: true });
+            await writeFile(path.join(uploadDir, filename), buffer);
+
+            logo = `/uploads/sellers/${filename}`;
+        }
+
+        await prisma.sellerIdentity.update({
+            where: { id },
+            data: {
+                companyName: formData.get('companyName') as string,
+                alias: formData.get('alias') as string,
+                logo: logo,
+                originCountry: formData.get('originCountry') as string,
+                originPort: formData.get('originPort') as string,
+                address: formData.get('address') as string,
+                tradeLicense: formData.get('tradeLicense') as string,
+                representative: formData.get('representative') as string,
+                passportNumber: formData.get('passportNumber') as string,
+                passportExpiry: formData.get('passportExpiry') as string,
+                country: formData.get('country') as string,
+                telephone: formData.get('telephone') as string,
+                email: formData.get('email') as string,
+            }
+        });
+    } catch (error) {
+        console.error("Failed to update seller:", error);
+        return "Failed to update seller profile.";
+    }
+
+    redirect('/admin/deals/create');
+}
+
+export async function deleteSeller(id: string, prevState: any, formData: FormData) {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+        return { message: "Unauthorized" };
+    }
+
+    try {
+        await prisma.sellerIdentity.delete({ where: { id } });
+    } catch (error) {
+        console.error("Failed to delete seller:", error);
+        return { message: "Failed to delete seller profile." };
+    }
+
+    redirect('/admin/deals/create');
+}
+
+export async function createDeal(
+    prevState: any,
+    formData: FormData,
+) {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+        return { message: "Unauthorized" };
     }
 
     const company = formData.get("company") as string;
@@ -140,6 +303,18 @@ export async function createDeal(
     const cfOrigin = (formData.get("cfOrigin") as string) || "Africa";
     const cfTransportMethod = (formData.get("cfTransportMethod") as string) || "Air Freight";
     const cfIcon = (formData.get("cfIcon") as string) || "gold-bar";
+    const cfOriginPort = (formData.get("cfOriginPort") as string) || "Kampala";
+    const incoterms = (formData.get("incoterms") as string) || "CIF";
+
+    // Seller fields
+    const sellerAddress = formData.get("sellerAddress") as string;
+    const sellerTradeLicense = formData.get("sellerTradeLicense") as string;
+    const sellerRepresentative = formData.get("sellerRepresentative") as string;
+    const sellerPassportNumber = formData.get("sellerPassportNumber") as string;
+    const sellerPassportExpiry = formData.get("sellerPassportExpiry") as string;
+    const sellerCountry = formData.get("sellerCountry") as string;
+    const sellerTelephone = formData.get("sellerTelephone") as string;
+    const sellerEmail = formData.get("sellerEmail") as string;
 
     // Check if purity is manually provided, otherwise derive from type
     let purity = 0.9999;
@@ -151,7 +326,7 @@ export async function createDeal(
     }
 
     if (!company || !commodity || isNaN(quantity) || isNaN(discount)) {
-        return "Invalid input data";
+        return { message: "Invalid input data" };
     }
 
     try {
@@ -195,14 +370,25 @@ export async function createDeal(
                 cfOrigin,
                 cfTransportMethod,
                 cfIcon,
+                cfOriginPort,
+                incoterms,
+                // Seller fields
+                sellerAddress,
+                sellerTradeLicense,
+                sellerRepresentative,
+                sellerPassportNumber,
+                sellerPassportExpiry,
+                sellerCountry,
+                sellerTelephone,
+                sellerEmail,
             },
         });
     } catch (error) {
         console.error("Create deal error:", error);
-        return "Failed to create deal";
+        return { message: "Failed to create deal" };
     }
 
-    redirect("/admin");
+    redirect("/admin/deals");
 }
 
 export async function deleteDeal(id: string) {
@@ -241,6 +427,27 @@ export async function updateDeal(
     const pricingModel = formData.get("pricingModel") as string;
     const quantity = parseFloat(formData.get("quantity") as string);
     const discount = parseFloat(formData.get("discount") as string);
+    const incoterms = (formData.get("incoterms") as string) || "CIF";
+
+    // Crowdfunding params
+    const cfRisk = formData.get("cfRisk") as string;
+    const cfTargetApy = parseFloat(formData.get("cfTargetApy") as string);
+    const cfDuration = parseInt(formData.get("cfDuration") as string);
+    const cfMinInvestment = parseFloat(formData.get("cfMinInvestment") as string);
+    const cfOrigin = formData.get("cfOrigin") as string;
+    const cfOriginPort = formData.get("cfOriginPort") as string;
+    const cfTransportMethod = formData.get("cfTransportMethod") as string;
+    const cfIcon = formData.get("cfIcon") as string;
+
+    // Seller fields
+    const sellerAddress = formData.get("sellerAddress") as string;
+    const sellerTradeLicense = formData.get("sellerTradeLicense") as string;
+    const sellerRepresentative = formData.get("sellerRepresentative") as string;
+    const sellerPassportNumber = formData.get("sellerPassportNumber") as string;
+    const sellerPassportExpiry = formData.get("sellerPassportExpiry") as string;
+    const sellerCountry = formData.get("sellerCountry") as string;
+    const sellerTelephone = formData.get("sellerTelephone") as string;
+    const sellerEmail = formData.get("sellerEmail") as string;
 
     // Check if purity is manually provided, otherwise derive from type
     let purity = 0.9999;
@@ -282,7 +489,26 @@ export async function updateDeal(
                 quantity,
                 purity,
                 discount,
+                incoterms,
                 pricePerKg: pricingModel === 'FIXED' ? pricePerKg : 0, // 0 for dynamic (calculated live), stored for fixed
+                // Update CF params
+                cfRisk,
+                cfTargetApy,
+                cfDuration,
+                cfMinInvestment,
+                cfOrigin,
+                cfOriginPort,
+                cfTransportMethod,
+                cfIcon,
+                // Update Seller fields
+                sellerAddress,
+                sellerTradeLicense,
+                sellerRepresentative,
+                sellerPassportNumber,
+                sellerPassportExpiry,
+                sellerCountry,
+                sellerTelephone,
+                sellerEmail,
             },
         });
 

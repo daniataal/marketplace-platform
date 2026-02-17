@@ -1,9 +1,13 @@
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import SettingsForm from "@/components/SettingsForm";
 import Navbar from "@/components/Navbar";
 
 export default async function SettingsPage() {
     const session = await auth();
+    const user = session?.user?.email
+        ? await prisma.user.findUnique({ where: { email: session.user.email } })
+        : session?.user;
 
     return (
         <div className="min-h-screen bg-background relative overflow-hidden">
@@ -22,7 +26,7 @@ export default async function SettingsPage() {
                         <p className="text-sm text-muted-foreground mt-1">Update your account details and password</p>
                     </div>
                     <div className="p-8">
-                        <SettingsForm user={session?.user} />
+                        <SettingsForm user={user} />
                     </div>
                 </div>
             </main>

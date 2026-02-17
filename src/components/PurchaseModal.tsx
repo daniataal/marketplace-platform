@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, MapPin, Package, DollarSign, AlertCircle, Warehouse, FileText, Eye } from 'lucide-react';
 import SpaPreviewModal from './SpaPreviewModal';
+import { generateSpaVariables } from '@/lib/spa-utils';
 
 interface PurchaseModalProps {
     isOpen: boolean;
@@ -18,6 +19,12 @@ interface PurchaseModalProps {
         discount: number;
         deliveryLocation: string;
         externalId?: string;
+        origin?: string;
+        originPort?: string;
+        cfOrigin?: string;
+        cfOriginPort?: string;
+        incoterms?: string;
+        productType?: string;
     };
     userBalance: number;
     userInfo?: {
@@ -27,6 +34,9 @@ interface PurchaseModalProps {
         email?: string | null;
         address?: string | null;
         nationality?: string | null;
+        passportNumber?: string | null;
+        passportExpiry?: string | null;
+        phoneNumber?: string | null;
     };
     sellerConfig: {
         companyName: string;
@@ -51,11 +61,20 @@ const DELIVERY_LOCATIONS = [
     { value: 'Other', label: 'Other / Custom Location', icon: '🌍' },
 ];
 
+const REFINERIES_BY_LOCATION: { [key: string]: string[] } = {
+    'Dubai': ['Al Etihad Gold', 'Emirates Gold', 'PAMP', 'Valcambi', 'Brinks Global Services', 'Transguard', 'Other / Custom'],
+    'Johannesburg': ['Rand Refinery', 'Metal Concentrators', 'Other / Custom'],
+    'London': ['Brinks', 'Malca-Amit', 'G4S', 'Loomis International', 'Other / Custom'],
+    'Singapore': ['Metalor Technologies Singapore', "Brink's Singapore", 'Other / Custom'],
+    'Mumbai': ['MMTC-PAMP', 'RiddiSiddhi Bullions', "Brink's India", 'Other / Custom'],
+};
+
 export function PurchaseModal({ isOpen, onClose, deal, userBalance, userInfo, sellerConfig, onPurchase }: PurchaseModalProps) {
     const [quantity, setQuantity] = useState(1);
     const [deliveryLocation, setDeliveryLocation] = useState(deal.deliveryLocation || 'Dubai');
     const [customLocation, setCustomLocation] = useState('');
     const [refinery, setRefinery] = useState('');
+    const [showCustomRefinery, setShowCustomRefinery] = useState(false);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [agreedToSPA, setAgreedToSPA] = useState(false);
     const [showSPAPreview, setShowSPAPreview] = useState(false);
@@ -75,7 +94,8 @@ export function PurchaseModal({ isOpen, onClose, deal, userBalance, userInfo, se
 
     // Validation
     const isLocationValid = deliveryLocation !== 'Other' || customLocation.trim().length > 0;
-    const canPurchase = agreedToTerms && agreedToSPA && !isInsufficient && quantity > 0 && quantity <= deal.availableQuantity && isLocationValid;
+    const isRefineryValid = refinery.trim().length > 0;
+    const canPurchase = agreedToTerms && agreedToSPA && !isInsufficient && quantity > 0 && quantity <= deal.availableQuantity && isLocationValid && isRefineryValid;
 
     // Generate SPA terms
     const buyerName = `${userInfo?.firstName || userInfo?.name || ''} ${userInfo?.lastName || ''}`.trim() || 'Buyer';
@@ -150,6 +170,7 @@ SELLER: ${sellerName}
             setDeliveryLocation(deal.deliveryLocation || 'Dubai');
             setCustomLocation('');
             setRefinery('');
+            setShowCustomRefinery(false);
             setAgreedToTerms(false);
             setAgreedToSPA(false);
             setError('');
@@ -241,7 +262,11 @@ SELLER: ${sellerName}
                                     {DELIVERY_LOCATIONS.map((loc) => (
                                         <button
                                             key={loc.value}
-                                            onClick={() => setDeliveryLocation(loc.value)}
+                                            onClick={() => {
+                                                setDeliveryLocation(loc.value);
+                                                setRefinery('');
+                                                setShowCustomRefinery(false);
+                                            }}
                                             className={`px-3 py-2 rounded-lg border text-left text-sm transition-all flex items-center ${deliveryLocation === loc.value
                                                 ? 'border-primary bg-primary/10 text-foreground ring-1 ring-primary/20'
                                                 : 'border-border bg-background hover:bg-secondary/50 text-muted-foreground'
@@ -271,16 +296,48 @@ SELLER: ${sellerName}
                                 <div className="space-y-2 pt-2 border-t border-border/50">
                                     <label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold flex items-center gap-2">
                                         <Warehouse className="w-3 h-3" />
-                                        Refinery / Secure Storage (Optional)
+                                        Refinery / Secure Storage <span className="text-destructive">*</span>
                                     </label>
-                                    <input
-                                        type="text"
-                                        value={refinery}
-                                        onChange={(e) => setRefinery(e.target.value)}
-                                        placeholder="e.g. Al Etihad Gold Refinery, Brinks Secure Storage..."
-                                        className="w-full px-4 py-3 bg-secondary/30 border border-transparent rounded-lg focus:bg-background focus:border-primary/50 focus:ring-1 focus:ring-primary outline-none transition-all"
-                                    />
-                                    <p className="text-xs text-muted-foreground">Specify the refinery or secure facility where you wish to receive the bullion.</p>
+
+                                    {REFINERIES_BY_LOCATION[deliveryLocation] ? (
+                                        <div className="space-y-2">
+                                            <select
+                                                value={showCustomRefinery ? 'Other / Custom' : (refinery || '')}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    if (val === 'Other / Custom') {
+                                                        setShowCustomRefinery(true);
+                                                        setRefinery('');
+                                                    } else {
+                                                        setShowCustomRefinery(false);
+                                                        setRefinery(val);
+                                                    }
+                                                }}
+                                                className="w-full px-4 py-3 bg-secondary/30 border border-transparent rounded-lg focus:bg-background focus:border-primary/50 focus:ring-1 focus:ring-primary outline-none transition-all appearance-none cursor-pointer"
+                                            >
+                                                <option value="" disabled>Select a facility...</option>
+                                                {REFINERIES_BY_LOCATION[deliveryLocation].map((r) => (
+                                                    <option key={r} value={r}>{r}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    ) : null}
+
+                                    {/* Custom Input: Show if location is 'Other' OR user selected 'Other' from dropdown */}
+                                    {(deliveryLocation === 'Other' || showCustomRefinery) && (
+                                        <div className={REFINERIES_BY_LOCATION[deliveryLocation] ? "animate-in fade-in slide-in-from-top-2 duration-200" : ""}>
+                                            <input
+                                                type="text"
+                                                value={refinery}
+                                                onChange={(e) => setRefinery(e.target.value)}
+                                                placeholder="e.g. Al Etihad Gold Refinery, Brinks Secure Storage..."
+                                                className={`w-full px-4 py-3 bg-secondary/30 border rounded-lg focus:bg-background outline-none transition-all ${refinery.trim() ? "border-transparent focus:border-primary/50 focus:ring-1 focus:ring-primary" : "border-destructive/30 focus:border-destructive/50 focus:ring-1 focus:ring-destructive/30"
+                                                    }`}
+                                            />
+                                        </div>
+                                    )}
+
+                                    <p className="text-xs text-muted-foreground">Specify the refinery or secure facility where you wish to receive the {deal.productType || 'product'}.</p>
                                 </div>
                             </div>
                         </div>
@@ -368,35 +425,17 @@ SELLER: ${sellerName}
                                         // Dynamic import to avoid SSR issues with react-pdf
                                         const { generateSpaPdfUrl } = await import('@/components/SpaPdfDocument');
 
-                                        const url = await generateSpaPdfUrl({
-                                            DEAL_ID: deal.id,
-                                            DATE: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-                                            SELLER_NAME: sellerConfig.companyName,
-                                            SELLER_ADDRESS: sellerConfig.address,
-                                            SELLER_TRADE_LICENCE: sellerConfig.tradeLicense,
-                                            SELLER_REPRESENTATIVE: sellerConfig.representative,
-                                            SELLER_PASSPORT_NUMBER: sellerConfig.passportNumber,
-                                            SELLER_PASSPORT_EXPIRY: sellerConfig.passportExpiry,
-                                            SELLER_COUNTRY: sellerConfig.country,
-                                            SELLER_TELEPHONE: sellerConfig.telephone,
-                                            SELLER_EMAIL: sellerConfig.email,
-                                            BUYER_NAME: buyerName,
-                                            BUYER_ADDRESS: userInfo?.address || "[Buyer Address to be provided]",
-                                            BUYER_TRADE_LICENCE: "[Buyer Trade Licence to be provided]",
-                                            BUYER_REPRESENTED_BY: buyerName,
-                                            BUYER_COUNTRY: userInfo?.nationality || "[Buyer Country to be provided]",
-                                            BUYER_TELEPHONE: "[Buyer Telephone to be provided]",
-                                            BUYER_EMAIL: userInfo?.email || "",
-                                            AU_PURITY: `${(deal.purity || 0) * 100}%`,
-                                            AU_FINESSE: deal.purity && deal.purity >= 0.9999 ? "24 Carat" : "+23 Carats",
-                                            AU_ORIGIN: "Uganda", // As per template default or fetch from deal if added later
-                                            AU_ORIGIN_PORT: "Kampala",
-                                            AU_DELIVERY_PORT: "DXB – Dubai International Airport",
-                                            AU_DESTINATION: fullDeliveryLocation,
-                                            QUANTITY: quantity.toString(),
-                                            PRICE: `$${deal.pricePerKg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD/kg`,
-                                            DELIVERY_COUNTRY: getDeliveryCountry()
+                                        const variables = generateSpaVariables({
+                                            deal,
+                                            buyer: userInfo,
+                                            sellerConfig,
+                                            quantity,
+                                            deliveryLocation: finalLocation,
+                                            refinery,
+                                            incoterms: deal.incoterms || 'CIF',
                                         });
+
+                                        const url = await generateSpaPdfUrl(variables);
 
                                         setPreviewUrl(url);
                                         setShowSPAPreview(true);
@@ -407,8 +446,9 @@ SELLER: ${sellerName}
                                         setLoading(false);
                                     }
                                 }}
-                                disabled={loading}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                                disabled={loading || !isLocationValid || !isRefineryValid}
+                                title={!isLocationValid || !isRefineryValid ? "Please fill all required fields first" : "Preview Draft SPA"}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Eye className="w-4 h-4" />
                                 {loading ? 'Generating...' : 'Preview Draft SPA'}

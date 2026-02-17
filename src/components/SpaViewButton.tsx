@@ -5,6 +5,7 @@ import { FileText, Eye, Loader2, CheckCircle } from 'lucide-react';
 import SpaPreviewModal from './SpaPreviewModal';
 import { signPurchaseAgreement } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
+import { generateSpaVariables } from '@/lib/spa-utils';
 
 interface SpaViewButtonProps {
     purchase: any;
@@ -22,59 +23,18 @@ export default function SpaViewButton({ purchase, sellerConfig }: SpaViewButtonP
 
     const getSpaVariables = () => {
         // If already signed and we have saved data, use it!
-        if (isSigned && purchase.agreement.spaData) {
+        if (isSigned && purchase.agreement?.spaData) {
             return purchase.agreement.spaData;
         }
 
-        // Otherwise generate from live data (Draft)
-        const buyerName = `${purchase.buyer?.firstName || purchase.buyer?.name || ''} ${purchase.buyer?.lastName || ''}`.trim() || 'Buyer';
-
-        const getDeliveryCountry = () => {
-            const locationMap: { [key: string]: string } = {
-                'Dubai': 'UAE',
-                'Johannesburg': 'ZAF',
-                'London': 'UK',
-                'Singapore': 'SGP',
-                'Mumbai': 'IND'
-            };
-
-            if (purchase.deliveryLocation.includes(' - ')) {
-                const baseCity = purchase.deliveryLocation.split(' - ')[0];
-                return locationMap[baseCity] || 'UAE';
-            }
-
-            return locationMap[purchase.deliveryLocation] || 'UAE';
-        };
-
-        return {
-            DEAL_ID: purchase.deal?.externalId || purchase.deal?.id,
-            DATE: new Date(purchase.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-            SELLER_NAME: sellerConfig.companyName,
-            SELLER_ADDRESS: sellerConfig.address,
-            SELLER_TRADE_LICENCE: sellerConfig.tradeLicense,
-            SELLER_REPRESENTATIVE: sellerConfig.representative,
-            SELLER_PASSPORT_NUMBER: sellerConfig.passportNumber,
-            SELLER_PASSPORT_EXPIRY: sellerConfig.passportExpiry,
-            SELLER_COUNTRY: sellerConfig.country,
-            SELLER_TELEPHONE: sellerConfig.telephone,
-            SELLER_EMAIL: sellerConfig.email,
-            BUYER_NAME: buyerName,
-            BUYER_ADDRESS: purchase.buyer?.address || "[Buyer Address to be provided]",
-            BUYER_TRADE_LICENCE: "[Buyer Trade Licence to be provided]",
-            BUYER_REPRESENTED_BY: buyerName,
-            BUYER_COUNTRY: purchase.buyer?.nationality || "[Buyer Country to be provided]",
-            BUYER_TELEPHONE: "[Buyer Telephone to be provided]",
-            BUYER_EMAIL: purchase.buyer?.email || "",
-            AU_PURITY: `${((purchase.deal?.purity || 0.9999) * 100).toFixed(2)}%`,
-            AU_FINESSE: purchase.deal?.purity && purchase.deal?.purity >= 0.9999 ? "24 Carat" : "+23 Carats",
-            AU_ORIGIN: "Uganda",
-            AU_ORIGIN_PORT: "Kampala",
-            AU_DELIVERY_PORT: "DXB – Dubai International Airport",
-            AU_DESTINATION: purchase.deliveryLocation,
-            QUANTITY: purchase.quantity.toString(),
-            PRICE: `$${(purchase.deal?.pricePerKg || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD/kg`,
-            DELIVERY_COUNTRY: getDeliveryCountry()
-        };
+        return generateSpaVariables({
+            deal: purchase.deal,
+            buyer: purchase.buyer,
+            sellerConfig,
+            quantity: purchase?.quantity || 0,
+            deliveryLocation: purchase.deliveryLocation,
+            customDate: new Date(purchase.createdAt)
+        });
     };
 
     const handlePreview = async () => {

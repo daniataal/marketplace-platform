@@ -1,12 +1,16 @@
 'use client';
 
 import { useActionState, useState, useEffect } from 'react';
-import { createDeal, getLiveGoldPrice } from '@/lib/actions';
+import { createDeal, getLiveGoldPrice, getSellerIdentities } from '@/lib/actions';
 import Link from 'next/link';
-import { ArrowLeft, Calculator, RefreshCw, Info } from 'lucide-react';
+import { ArrowLeft, Calculator, RefreshCw, Info, Plus, ChevronRight, User, Globe, MapPin, Pencil, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function CreateDealPage() {
-    const [errorMessage, dispatch] = useActionState(createDeal, undefined);
+    const initialState = { message: '' };
+    const [state, dispatch] = useActionState(createDeal, initialState);
+
+    const [step, setStep] = useState<'SELECT_SELLER' | 'CREATE_DEAL'>('SELECT_SELLER');
+    const [showSellerDetails, setShowSellerDetails] = useState(false);
 
     // Form State
     const [type, setType] = useState('BULLION');
@@ -15,23 +19,61 @@ export default function CreateDealPage() {
     const [discount, setDiscount] = useState(0);
     const [fixedPrice, setFixedPrice] = useState<number | ''>('');
     const [quantity, setQuantity] = useState<number | ''>('');
+    const [incoterms, setIncoterms] = useState('CIF');
 
     // Market Data
     const [marketPrice, setMarketPrice] = useState(0);
     const [isLoadingPrice, setIsLoadingPrice] = useState(false);
     const [priceError, setPriceError] = useState(false);
 
+    // Seller Data
+    const [sellers, setSellers] = useState<any[]>([]);
+    const [sellerDetails, setSellerDetails] = useState({
+        companyName: '',
+        originCountry: '',
+        originPort: '',
+        address: '',
+        tradeLicense: '',
+        representative: '',
+        passportNumber: '',
+        passportExpiry: '',
+        country: '',
+        telephone: '',
+        email: ''
+    });
+
     // Derived Values
     const calculatedPrice = pricingModel === 'FIXED'
         ? (fixedPrice === '' ? 0 : fixedPrice)
         : (marketPrice * purity) * (1 - discount / 100);
 
-    // Fetch initial market price and poll every 10 seconds
+    // Fetch initial market price and sellers
     useEffect(() => {
         refreshPrice();
         const interval = setInterval(refreshPrice, 10000);
+
+        // Fetch sellers
+        getSellerIdentities().then(setSellers).catch(console.error);
+
         return () => clearInterval(interval);
     }, []);
+
+    const handleSellerSelect = (seller: any) => {
+        setSellerDetails({
+            companyName: seller.companyName,
+            originCountry: seller.originCountry || '',
+            originPort: seller.originPort || '',
+            address: seller.address || '',
+            tradeLicense: seller.tradeLicense || '',
+            representative: seller.representative || '',
+            passportNumber: seller.passportNumber || '',
+            passportExpiry: seller.passportExpiry || '',
+            country: seller.country || '',
+            telephone: seller.telephone || '',
+            email: seller.email || ''
+        });
+        setStep('CREATE_DEAL');
+    };
 
     // Update purity when type changes
     useEffect(() => {
@@ -42,7 +84,7 @@ export default function CreateDealPage() {
             case '22K': setPurity(0.916); break; // Dore 22k
             case '21K': setPurity(0.875); break; // Dore 21k
             case '18K': setPurity(0.750); break; // Dore 18k
-            default: break; // Keep manual if custom
+            default: setPurity(0.9999); // Keep manual if custom
         }
     }, [type]);
 
@@ -51,10 +93,10 @@ export default function CreateDealPage() {
         setPriceError(false);
         try {
             const price = await getLiveGoldPrice();
-            if (price === 0) {
-                setPriceError(true);
-            } else {
+            if (price > 0) {
                 setMarketPrice(price);
+            } else {
+                setPriceError(true);
             }
         } catch (error) {
             console.error("Failed to fetch price", error);
@@ -64,16 +106,121 @@ export default function CreateDealPage() {
         }
     };
 
+    if (step === 'SELECT_SELLER') {
+        return (
+            <div className="container mx-auto p-6 max-w-5xl">
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <Link
+                            href="/admin/deals"
+                            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+                        >
+                            <ArrowLeft className="w-4 h-4 mr-1" />
+                            Back to Deals
+                        </Link>
+                        <h1 className="text-3xl font-bold text-foreground">Select Seller</h1>
+                        <p className="text-muted-foreground mt-1">Choose a seller profile to start a new deal</p>
+                    </div>
+                    <Link
+                        href="/admin/sellers/create"
+                        className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        New Seller Profile
+                    </Link>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {sellers.map((seller) => (
+                        <div
+                            key={seller.id}
+                            className="group relative bg-card border border-border hover:border-primary/50 hover:shadow-md transition-all rounded-xl p-6 overflow-hidden flex flex-col"
+                        >
+                            <div className="absolute top-4 right-4 z-20">
+                                <Link
+                                    href={`/admin/sellers/${seller.id}/edit`}
+                                    className="p-2 bg-secondary/80 hover:bg-primary text-muted-foreground hover:text-primary-foreground rounded-lg transition-colors inline-flex items-center justify-center opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                    title="Edit Seller"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <Pencil className="w-4 h-4" />
+                                </Link>
+                            </div>
+
+                            <button
+                                onClick={() => handleSellerSelect(seller)}
+                                className="text-left w-full h-full flex flex-col focus:outline-none"
+                                type="button"
+                            >
+                                <div className="flex items-start justify-between mb-4 w-full pr-10">
+                                    <div className="p-3 bg-secondary/50 rounded-lg group-hover:bg-primary/10 transition-colors">
+                                        {seller.logo ? (
+                                            <img src={seller.logo} alt={seller.companyName} className="w-10 h-10 object-contain" />
+                                        ) : (
+                                            <User className="w-10 h-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                                        )}
+                                    </div>
+                                    {seller.alias && (
+                                        <span className="text-xs font-medium px-2 py-1 bg-secondary rounded-full text-muted-foreground whitespace-nowrap">
+                                            {seller.alias}
+                                        </span>
+                                    )}
+                                </div>
+
+                                <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">{seller.companyName}</h3>
+
+                                <div className="space-y-2 mt-4 text-sm text-muted-foreground">
+                                    {seller.originCountry && (
+                                        <div className="flex items-center gap-2">
+                                            <Globe className="w-3.5 h-3.5" />
+                                            <span>{seller.originCountry}</span>
+                                        </div>
+                                    )}
+                                    {seller.originPort && (
+                                        <div className="flex items-center gap-2">
+                                            <MapPin className="w-3.5 h-3.5" />
+                                            <span>{seller.originPort}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="absolute right-4 bottom-4 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                                    <div className="p-2 bg-primary text-primary-foreground rounded-full shadow-lg">
+                                        <ChevronRight className="w-4 h-4" />
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    ))}
+
+                    <Link
+                        href="/admin/sellers/create"
+                        className="flex flex-col items-center justify-center text-center bg-secondary/20 border-2 border-dashed border-border hover:border-primary/50 hover:bg-secondary/30 transition-all rounded-xl p-6 min-h-[200px]"
+                    >
+                        <div className="p-4 bg-background rounded-full mb-4 shadow-sm">
+                            <Plus className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                        <h3 className="font-medium text-foreground">Create New Seller</h3>
+                        <p className="text-xs text-muted-foreground mt-1 px-4">Register a new mining company or supplier</p>
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-4xl mx-auto">
             <div className="mb-6 flex items-center justify-between">
                 <div>
-                    <Link href="/admin" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+                    <button
+                        onClick={() => setStep('SELECT_SELLER')}
+                        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+                    >
                         <ArrowLeft className="w-4 h-4 mr-1" />
-                        Back to Dashboard
-                    </Link>
+                        Change Seller
+                    </button>
                     <h1 className="text-3xl font-bold text-foreground">Create New Deal</h1>
-                    <p className="text-muted-foreground mt-1">List a commodity deal with dynamic pricing options</p>
+                    <p className="text-muted-foreground mt-1">For {sellerDetails.companyName}</p>
                 </div>
 
                 {/* Live Market Price Widget */}
@@ -121,6 +268,8 @@ export default function CreateDealPage() {
                                         name="company"
                                         id="company"
                                         required
+                                        value={sellerDetails.companyName}
+                                        onChange={(e) => setSellerDetails({ ...sellerDetails, companyName: e.target.value })}
                                         className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50"
                                         placeholder="e.g. Acme Mining Corp"
                                     />
@@ -139,20 +288,46 @@ export default function CreateDealPage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="deliveryLocation">Origin Location</label>
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            name="deliveryLocation"
-                                            id="deliveryLocation"
-                                            required
-                                            defaultValue="Dubai"
-                                            className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50 pl-10"
-                                            placeholder="e.g. Dubai, Ghana, London"
-                                        />
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">📍</span>
-                                    </div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="incoterms">Transaction Terms</label>
+                                    <select
+                                        name="incoterms"
+                                        id="incoterms"
+                                        value={incoterms}
+                                        onChange={(e) => setIncoterms(e.target.value)}
+                                        className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none"
+                                    >
+                                        <option value="CIF">CIF - Cost, Insurance & Freight (Delivery to Buyer)</option>
+                                        <option value="FOB">FOB - Free On Board (Buyer arranges Shipping)</option>
+                                        <option value="EXW">EXW - Ex Works / Cash & Carry (Buyer picks up)</option>
+                                    </select>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        {incoterms === 'CIF' && "Seller covers insurance and freight to buyer's destination."}
+                                        {incoterms === 'FOB' && "Seller delivers to port; Buyer handles shipping."}
+                                        {incoterms === 'EXW' && "Buyer collects directly from the trading hub."}
+                                    </p>
                                 </div>
+
+                                {incoterms !== 'CIF' ? (
+                                    <div>
+                                        <label className="block text-sm font-medium text-muted-foreground mb-1">
+                                            {incoterms === 'FOB' ? 'FOB Point / Trading Hub' : 'Pickup Location / Trading Hub'}
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                name="deliveryLocation"
+                                                id="deliveryLocation"
+                                                required
+                                                defaultValue="Dubai"
+                                                className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50 pl-10"
+                                                placeholder="e.g. Dubai, Ghana, London"
+                                            />
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">📍</span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <input type="hidden" name="deliveryLocation" value="Dubai" />
+                                )}
 
                                 <div>
                                     <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="quantity">Quantity (kg)</label>
@@ -258,12 +433,56 @@ export default function CreateDealPage() {
                                                     min="0"
                                                     step="0.01"
                                                     value={fixedPrice}
-                                                    onChange={(e) => setFixedPrice(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value === '' ? '' : parseFloat(e.target.value);
+                                                        setFixedPrice(val);
+                                                        if (typeof val === 'number' && marketPrice > 0) {
+                                                            const baseValue = marketPrice * purity;
+                                                            // fixed = base * (1 - discount/100)
+                                                            // fixed/base = 1 - discount/100
+                                                            // discount/100 = 1 - fixed/base
+                                                            // discount = (1 - fixed/base) * 100
+                                                            const impliedDiscount = (1 - val / baseValue) * 100;
+                                                            setDiscount(parseFloat(impliedDiscount.toFixed(4)));
+                                                        } else {
+                                                            setDiscount(0);
+                                                        }
+                                                    }}
                                                     className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50"
                                                     placeholder="0.00"
                                                 />
-                                                <input type="hidden" name="discount" value="0" />
-                                                <p className="text-xs text-muted-foreground mt-1">Set a fixed price per kilogram</p>
+                                                {fixedPrice && marketPrice > 0 ? (
+                                                    (() => {
+                                                        const baseValue = marketPrice * purity;
+                                                        const percentage = (Number(fixedPrice) / baseValue * 100) - 100;
+                                                        const isPremium = percentage > 0;
+                                                        const displayPercentage = Math.abs(percentage).toFixed(2);
+
+                                                        // Example: Fixed=110, Base=100. Pct = 10%. Premium.
+                                                        // Display: Premium +10.00%
+                                                        // Hidden Discount: -10 (which means premium in our backend logic where discount is usually positive reduction)
+
+                                                        // Example: Fixed=90, Base=100. Pct = -10%. Discount.
+                                                        // Display: Discount -10.00% (or just 10%?)
+                                                        // User asked: "IF ITS DISCOUNT IT STAYS MINUS (-)"
+                                                        // Wait, user said: "IF ITS DISCOUNT IT STAYS MINUS (-) IF ITS PREMIUM IT WILL SAY PREMIUM AND ADD THE (+) AND THE PERCENTAGE"
+                                                        // Example 90/100*100 - 100 = -10.
+                                                        // So display "-10.00%".
+                                                        // Hidden Discount: 10.
+
+                                                        return (
+                                                            <div className="flex items-center justify-between mt-1 text-xs">
+                                                                <span className={isPremium ? "text-amber-500 font-medium" : "text-green-500 font-medium"}>
+                                                                    {isPremium ? `Premium +${displayPercentage}%` : `Discount ${percentage.toFixed(2)}%`}
+                                                                </span>
+                                                                <input type="hidden" name="discount" value={(-percentage).toFixed(4)} />
+                                                            </div>
+                                                        );
+                                                    })()
+                                                ) : (
+                                                    <input type="hidden" name="discount" value="0" />
+                                                )}
+                                                <p className="text-xs text-muted-foreground mt-1">Set a fixed price per kilogram. Base Value: ${(marketPrice * purity).toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
                                             </>
                                         ) : (
                                             <>
@@ -288,9 +507,159 @@ export default function CreateDealPage() {
                                 </div>
                             </div>
 
+                            <div className="h-px bg-border/50 my-6" />
+
+                            <div className="space-y-4 bg-secondary/10 p-4 rounded-xl border border-border/50">
+                                <button
+                                    type="button"
+                                    className="w-full flex items-center justify-between cursor-pointer focus:outline-none select-none py-1"
+                                    onClick={() => setShowSellerDetails(!showSellerDetails)}
+                                >
+                                    <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                                        <Info className="w-5 h-5 text-primary" />
+                                        Seller & Origin Details
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-sm text-primary font-medium bg-background/50 px-3 py-1.5 rounded-full border border-border hover:border-primary transition-colors">
+                                        {showSellerDetails ? 'Collapse' : 'Expand Details'}
+                                        {showSellerDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                    </div>
+                                </button>
+
+                                {showSellerDetails && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-border/50 mt-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                                        <div>
+                                            <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="cfOrigin">Country of Origin (Mined)</label>
+                                            <input
+                                                type="text"
+                                                name="cfOrigin"
+                                                id="cfOrigin"
+                                                value={sellerDetails.originCountry}
+                                                onChange={(e) => setSellerDetails({ ...sellerDetails, originCountry: e.target.value })}
+                                                placeholder="e.g. Uganda"
+                                                className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="cfOriginPort">Port of Origin (Export)</label>
+                                            <input
+                                                type="text"
+                                                name="cfOriginPort"
+                                                id="cfOriginPort"
+                                                value={sellerDetails.originPort}
+                                                onChange={(e) => setSellerDetails({ ...sellerDetails, originPort: e.target.value })}
+                                                placeholder="e.g. Kampala"
+                                                className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary outline-none"
+                                            />
+                                        </div>
+
+                                        <div className="col-span-full">
+                                            <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="sellerAddress">Seller Address</label>
+                                            <input
+                                                type="text"
+                                                name="sellerAddress"
+                                                id="sellerAddress"
+                                                value={sellerDetails.address}
+                                                onChange={(e) => setSellerDetails({ ...sellerDetails, address: e.target.value })}
+                                                placeholder="Business Address"
+                                                className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary outline-none"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="sellerTradeLicense">Trade License No.</label>
+                                            <input
+                                                type="text"
+                                                name="sellerTradeLicense"
+                                                id="sellerTradeLicense"
+                                                value={sellerDetails.tradeLicense}
+                                                onChange={(e) => setSellerDetails({ ...sellerDetails, tradeLicense: e.target.value })}
+                                                placeholder="License Number"
+                                                className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="sellerRepresentative">Representative Name</label>
+                                            <input
+                                                type="text"
+                                                name="sellerRepresentative"
+                                                id="sellerRepresentative"
+                                                value={sellerDetails.representative}
+                                                onChange={(e) => setSellerDetails({ ...sellerDetails, representative: e.target.value })}
+                                                placeholder="Full Name"
+                                                className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary outline-none"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="sellerPassportNumber">Passport Number</label>
+                                            <input
+                                                type="text"
+                                                name="sellerPassportNumber"
+                                                id="sellerPassportNumber"
+                                                value={sellerDetails.passportNumber}
+                                                onChange={(e) => setSellerDetails({ ...sellerDetails, passportNumber: e.target.value })}
+                                                placeholder="Passport No."
+                                                className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="sellerPassportExpiry">Passport Expiry</label>
+                                            <input
+                                                type="text"
+                                                name="sellerPassportExpiry"
+                                                id="sellerPassportExpiry"
+                                                value={sellerDetails.passportExpiry}
+                                                onChange={(e) => setSellerDetails({ ...sellerDetails, passportExpiry: e.target.value })}
+                                                placeholder="DD/MM/YYYY"
+                                                className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary outline-none"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="sellerCountry">Seller Country</label>
+                                            <input
+                                                type="text"
+                                                name="sellerCountry"
+                                                id="sellerCountry"
+                                                value={sellerDetails.country}
+                                                onChange={(e) => setSellerDetails({ ...sellerDetails, country: e.target.value })}
+                                                placeholder="Country"
+                                                className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="sellerTelephone">Seller Phone</label>
+                                            <input
+                                                type="text"
+                                                name="sellerTelephone"
+                                                id="sellerTelephone"
+                                                value={sellerDetails.telephone}
+                                                onChange={(e) => setSellerDetails({ ...sellerDetails, telephone: e.target.value })}
+                                                placeholder="+123..."
+                                                className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary outline-none"
+                                            />
+                                        </div>
+                                        <div className="col-span-full">
+                                            <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="sellerEmail">Seller Email</label>
+                                            <input
+                                                type="email"
+                                                name="sellerEmail"
+                                                id="sellerEmail"
+                                                value={sellerDetails.email}
+                                                onChange={(e) => setSellerDetails({ ...sellerDetails, email: e.target.value })}
+                                                placeholder="email@company.com"
+                                                className="w-full p-3 bg-secondary/30 rounded-lg text-foreground border border-transparent focus:border-primary outline-none"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
                             <div className="pt-4 border-t border-border">
-                                {errorMessage && (
-                                    <p className="text-sm text-destructive mb-4">{errorMessage}</p>
+                                {state?.message && (
+                                    <p className={`mt-4 text-center font-medium ${state.message.includes('Error') ? 'text-destructive' : 'text-green-500'}`}>
+                                        {state.message}
+                                    </p>
                                 )}
                                 <button
                                     type="submit"
@@ -324,11 +693,16 @@ export default function CreateDealPage() {
                                 </div>
                             </div>
 
+
                             <div className="p-4 bg-primary/5 rounded-lg border border-primary/20 space-y-3">
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-muted-foreground">Discount</span>
-                                    <span className="font-mono text-accent">-{discount}%</span>
-                                </div>
+                                {Number(discount) !== 0 && (
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-muted-foreground">{Number(discount) < 0 ? 'Premium' : 'Discount'}</span>
+                                        <span className={`font-mono ${Number(discount) < 0 ? 'text-amber-500' : 'text-accent'}`}>
+                                            {Number(discount) < 0 ? '+' : '-'}{Math.abs(Number(discount)).toFixed(2)}%
+                                        </span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between items-end pt-2 border-t border-primary/20">
                                     <div>
                                         <span className="block text-xs text-muted-foreground uppercase tracking-wider mb-1">Final Price</span>
@@ -345,34 +719,35 @@ export default function CreateDealPage() {
                                     </span>
                                 </div>
                             </div>
+                        </div>
 
-                            {quantity !== '' && (
-                                <div className="p-4 bg-secondary/30 rounded-lg border border-border/50">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="text-sm text-muted-foreground">Total Value ({quantity}kg)</span>
-                                    </div>
-                                    <div className="text-2xl font-mono font-bold text-foreground text-right relative">
-                                        ${(calculatedPrice * Number(quantity)).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                        {pricingModel === 'DYNAMIC' && (
-                                            <span className="absolute -top-1 -right-2 w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                                        )}
-                                    </div>
+                        {quantity !== '' && (
+                            <div className="p-4 bg-secondary/30 rounded-lg border border-border/50">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-sm text-muted-foreground">Total Value ({quantity}kg)</span>
                                 </div>
-                            )}
-
-                            <div className="text-xs text-muted-foreground flex gap-2 p-3 bg-muted/50 rounded-lg">
-                                <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                                <p>
-                                    {pricingModel === 'FIXED'
-                                        ? "This deal will be locked at the current calculated price regardless of future market changes."
-                                        : "This deal's price will automatically update as the LBMA market price fluctuates, maintaining the discount percentage."
-                                    }
-                                </p>
+                                <div className="text-2xl font-mono font-bold text-foreground text-right relative">
+                                    ${(calculatedPrice * Number(quantity)).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                    {pricingModel === 'DYNAMIC' && (
+                                        <span className="absolute -top-1 -right-2 w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                                    )}
+                                </div>
                             </div>
+                        )}
+
+                        <div className="text-xs text-muted-foreground flex gap-2 p-3 bg-muted/50 rounded-lg">
+                            <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                            <p>
+                                {pricingModel === 'FIXED'
+                                    ? "This deal will be locked at the current calculated price regardless of future market changes."
+                                    : "This deal's price will automatically update as the LBMA market price fluctuates, maintaining the discount percentage."
+                                }
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
     );
 }

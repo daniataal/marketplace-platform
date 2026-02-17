@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     page: {
         padding: 40,
         fontFamily: 'Helvetica',
-        fontSize: 8, // Slightly smaller to fit full content gracefully
+        fontSize: 8,
         lineHeight: 1.3,
         color: '#000',
     },
@@ -32,6 +32,7 @@ const styles = StyleSheet.create({
 });
 
 export interface SpaVariables {
+    YEAR: string;
     DATE: string;
     SELLER_NAME: string;
     SELLER_ADDRESS: string;
@@ -46,6 +47,8 @@ export interface SpaVariables {
     BUYER_ADDRESS: string;
     BUYER_TRADE_LICENCE: string;
     BUYER_REPRESENTED_BY: string;
+    BUYER_PASSPORT_NUMBER: string;
+    BUYER_PASSPORT_EXPIRY: string;
     BUYER_COUNTRY: string;
     BUYER_TELEPHONE: string;
     BUYER_EMAIL: string;
@@ -64,7 +67,7 @@ export interface SpaVariables {
 const SPA_TEMPLATE_TEXT = `
 SALE AND PURCHASE AGREEMENT (SPA)
 OF NON-REFINED GOLD (AU) BARS
-TRANSACTION CODE: CIF-{SELLER_INITIALS}-{DELIVERY_COUNTRY}-{DATE}
+TRANSACTION CODE: CIF-{SELLER_INITIALS}-{DELIVERY_COUNTRY}-{YEAR}
 
 This Sales Purchase Agreement (SPA) is made and entered into on the {DATE}, by and between:
 SELLER:
@@ -84,8 +87,8 @@ Company Name: {BUYER_NAME}
 Business Address: {BUYER_ADDRESS}
 Trade Licence No.:	 {BUYER_TRADE_LICENCE}
 Represented By:	{BUYER_REPRESENTED_BY}
-Passport Number:	 
-Passport Expiration:	
+Passport Number:	 {BUYER_PASSPORT_NUMBER}
+Passport Expiration:	{BUYER_PASSPORT_EXPIRY}
 Country:		{BUYER_COUNTRY}
 Telephone:		{BUYER_TELEPHONE}
 Email: {BUYER_EMAIL}
