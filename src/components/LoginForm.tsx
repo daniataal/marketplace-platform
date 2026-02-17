@@ -60,10 +60,18 @@ export default function LoginForm() {
     );
 }
 
+import { useFormStatus } from 'react-dom';
+
 function LoginButton() {
+    const { pending } = useFormStatus();
+
     return (
-        <button className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-medium py-2.5 rounded-lg shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
-            Sign In
+        <button
+            type="submit"
+            disabled={pending}
+            className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-medium py-2.5 rounded-lg shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+        >
+            {pending ? 'Signing In...' : 'Sign In'}
         </button>
     );
 }

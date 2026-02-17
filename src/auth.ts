@@ -7,10 +7,12 @@ import bcrypt from "bcryptjs"
 
 async function getUser(email: string) {
     try {
+        console.log(`[Auth] Fetching user: ${email}`);
         const user = await prisma.user.findUnique({ where: { email } });
+        console.log(`[Auth] User found: ${!!user}`);
         return user;
     } catch (error) {
-        console.error('Failed to fetch user:', error);
+        console.error('[Auth] Failed to fetch user:', error);
         throw new Error('Failed to fetch user.');
     }
 }
@@ -26,10 +28,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 if (parsedCredentials.success) {
                     const { email, password } = parsedCredentials.data;
+                    console.log(`[Auth] Attempting login for: ${email}`);
                     const user = await getUser(email.toLowerCase());
-                    if (!user) return null;
+                    if (!user) {
+                        console.log(`[Auth] No user found for: ${email}`);
+                        return null;
+                    }
 
                     const passwordsMatch = await bcrypt.compare(password, user.password);
+                    console.log(`[Auth] Password match: ${passwordsMatch}`);
                     if (passwordsMatch) {
                         return {
                             id: user.id,

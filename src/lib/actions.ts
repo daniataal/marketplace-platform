@@ -21,10 +21,16 @@ export async function authenticate(
     formData: FormData,
 ): Promise<string | undefined> {
     try {
-        await signIn('credentials', formData);
+        console.log("[Actions] Starting authentication process...");
+        await signIn('credentials', {
+            ...Object.fromEntries(formData),
+            redirectTo: '/dashboard',
+        });
+        console.log("[Actions] Authentication call completed (should have redirected)");
         return undefined;
-    } catch (error) {
+    } catch (error: any) {
         if (error instanceof AuthError) {
+            console.log(`[Actions] Auth Error: ${error.type}`);
             switch (error.type) {
                 case 'CredentialsSignin':
                     return 'Invalid credentials.';
@@ -32,6 +38,7 @@ export async function authenticate(
                     return 'Something went wrong.';
             }
         }
+        console.log("[Actions] Sign-in error/redirect:", error?.name || "Unknown");
         throw error;
     }
 }
