@@ -173,7 +173,14 @@ export default function EditDealForm({ deal }: { deal: any }) {
                                                 <span>Annual Commitment</span>
                                                 <span className="text-sm">{totalAnnualQuantity.toLocaleString()} kg / Year</span>
                                             </div>
-                                            <p className="text-[10px] text-muted-foreground mt-1 text-center">
+                                            <div className="text-xs font-bold text-primary flex justify-between items-center mt-1">
+                                                <span>Estimated Annual Value</span>
+                                                <span className="text-sm">${(totalAnnualQuantity * (calculatedPrice || 0)).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                                            </div>
+                                            <div className="text-[10px] text-primary/70 mt-1 font-medium">
+                                                Breakdown: {quantity} kg x {multipliers[frequency as keyof typeof multipliers]} periods per year
+                                            </div>
+                                            <p className="text-[10px] text-muted-foreground mt-2 pt-2 border-t border-primary/10 text-center">
                                                 * 1 Year Contract with 5 Years rolling extensions
                                             </p>
                                         </div>
@@ -462,9 +469,14 @@ export default function EditDealForm({ deal }: { deal: any }) {
                                 <div className="flex justify-between items-center mb-1">
                                     <span className="text-xs text-muted-foreground">Total Deal Value</span>
                                 </div>
-                                <div className="font-mono text-lg font-semibold text-foreground">
+                                <div className="font-mono text-lg font-semibold text-foreground leading-none">
                                     ${(quantity * calculatedPrice).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                 </div>
+                                {frequency !== 'SPOT' && (
+                                    <div className="text-xs font-bold text-accent mt-1">
+                                        Annual: ${(totalAnnualQuantity * calculatedPrice).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

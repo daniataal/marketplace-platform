@@ -27,6 +27,8 @@ model Deal {
   totalQuantity     Float?      // Total quantity over the contract duration
   contractDuration  Int         @default(1) // Duration in years (default 1 for periodic)
   extensionYears    Int         @default(5) // Rolling extensions in years
+  totalValue        Float       @default(0) // Snapshot of periodic value
+  annualValue       Float       @default(0) // Snapshot of annual value
   
   // Crowdfunding export parameters (defaults for when purchases are exported)
   cfRisk            String      @default("Low") // Risk level for crowdfunding

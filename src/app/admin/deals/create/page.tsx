@@ -373,7 +373,14 @@ export default function CreateDealPage() {
                                                 <span>Annual Commitment</span>
                                                 <span className="text-sm">{totalAnnualQuantity.toLocaleString()} kg / Year</span>
                                             </div>
-                                            <p className="text-[10px] text-muted-foreground mt-1">
+                                            <div className="text-xs font-bold text-primary flex justify-between items-center mt-1">
+                                                <span>Estimated Annual Value</span>
+                                                <span className="text-sm">${(totalAnnualQuantity * (calculatedPrice || 0)).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                                            </div>
+                                            <div className="text-[10px] text-primary/70 mt-1 font-medium">
+                                                Breakdown: {quantity} kg x {multipliers[frequency as keyof typeof multipliers]} periods per year
+                                            </div>
+                                            <p className="text-[10px] text-muted-foreground mt-2 pt-2 border-t border-primary/10">
                                                 * 1 Year Contract with 5 Years rolling extensions
                                             </p>
                                         </div>
@@ -418,7 +425,7 @@ export default function CreateDealPage() {
                                             id="purity"
                                             required
                                             min="0"
-                                            max="1"
+                                            max="0.9999"
                                             step="0.0001"
                                             value={purity}
                                             onChange={(e) => setPurity(parseFloat(e.target.value))}
@@ -738,7 +745,7 @@ export default function CreateDealPage() {
                                 )}
                                 <div className="flex justify-between items-end pt-2 border-t border-primary/20">
                                     <div>
-                                        <span className="block text-xs text-muted-foreground uppercase tracking-wider mb-1">Final Price</span>
+                                        <span className="block text-xs text-muted-foreground uppercase tracking-wider mb-1">Final Price (per kg)</span>
                                         <div className="flex items-center gap-2">
                                             {pricingModel === 'DYNAMIC' && (
                                                 <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-500 border border-blue-500/30">
@@ -759,10 +766,17 @@ export default function CreateDealPage() {
                                 <div className="flex justify-between items-center mb-1">
                                     <span className="text-sm text-muted-foreground">Total Value ({quantity}kg)</span>
                                 </div>
-                                <div className="text-2xl font-mono font-bold text-foreground text-right relative">
-                                    ${(calculatedPrice * Number(quantity)).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                    {pricingModel === 'DYNAMIC' && (
-                                        <span className="absolute -top-1 -right-2 w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                                <div className="text-right flex flex-col items-end">
+                                    <div className="text-2xl font-mono font-bold text-foreground relative">
+                                        ${(calculatedPrice * Number(quantity)).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                        {pricingModel === 'DYNAMIC' && (
+                                            <span className="absolute -top-1 -right-2 w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                                        )}
+                                    </div>
+                                    {frequency !== 'SPOT' && (
+                                        <div className="text-sm font-bold text-accent mt-1">
+                                            Annual: ${(totalAnnualQuantity * calculatedPrice).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                        </div>
                                     )}
                                 </div>
                             </div>
