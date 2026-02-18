@@ -4,6 +4,7 @@ import { useActionState, useState, useEffect } from 'react';
 import { createDeal, getLiveGoldPrice, getSellerIdentities } from '@/lib/actions';
 import Link from 'next/link';
 import { ArrowLeft, Calculator, RefreshCw, Info, Plus, ChevronRight, User, Globe, MapPin, Pencil, ChevronDown, ChevronUp } from 'lucide-react';
+import { SellerLogo } from '@/components/admin/SellerLogo';
 
 export default function CreateDealPage() {
     const initialState = { message: '' };
@@ -160,11 +161,7 @@ export default function CreateDealPage() {
                             >
                                 <div className="flex items-start justify-between mb-4 w-full pr-10">
                                     <div className="p-3 bg-secondary/50 rounded-lg group-hover:bg-primary/10 transition-colors">
-                                        {seller.logo ? (
-                                            <img src={seller.logo} alt={seller.companyName} className="w-10 h-10 object-contain" />
-                                        ) : (
-                                            <User className="w-10 h-10 text-muted-foreground group-hover:text-primary transition-colors" />
-                                        )}
+                                        <SellerLogo src={seller.logo} companyName={seller.companyName} className="w-10 h-10" />
                                     </div>
                                     {seller.alias && (
                                         <span className="text-xs font-medium px-2 py-1 bg-secondary rounded-full text-muted-foreground whitespace-nowrap">

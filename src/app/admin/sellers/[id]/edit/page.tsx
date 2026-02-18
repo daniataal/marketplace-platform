@@ -5,6 +5,7 @@ import { updateSeller, getSellerIdentity, deleteSeller } from '@/lib/actions';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { SellerLogo } from '@/components/admin/SellerLogo';
 
 export default function EditSellerPage() {
     const params = useParams();
@@ -71,9 +72,9 @@ export default function EditSellerPage() {
                     <label className="block text-sm font-medium text-foreground">Company Logo</label>
 
                     {seller.logo && (
-                        <div className="mb-2">
-                            <img src={seller.logo} alt="Current Logo" className="h-12 w-auto object-contain" />
-                            <p className="text-xs text-muted-foreground mt-1">Current Logo</p>
+                        <div className="mb-4 flex flex-col items-center p-4 bg-secondary/30 rounded-lg border border-border/50 w-fit">
+                            <SellerLogo src={seller.logo} companyName={seller.companyName} className="w-24 h-24" />
+                            <p className="text-xs text-muted-foreground mt-2 font-medium">Current Logo</p>
                         </div>
                     )}
 
