@@ -17,15 +17,15 @@ export default async function SettingsPage() {
 
             <Navbar user={session?.user} />
 
-            <main className="max-w-4xl mx-auto px-4 py-12 relative z-10">
-                <h1 className="text-3xl font-bold text-foreground mb-8">Settings</h1>
+            <main className="max-w-4xl mx-auto px-4 py-8 md:py-12 relative z-10">
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-6 md:mb-8">Settings</h1>
 
                 <div className="bg-card/50 backdrop-blur-xl border border-white/5 rounded-xl shadow-2xl overflow-hidden">
-                    <div className="px-8 py-6 border-b border-white/5 bg-white/5">
-                        <h2 className="text-xl font-semibold text-foreground">Profile Information</h2>
-                        <p className="text-sm text-muted-foreground mt-1">Update your account details and password</p>
+                    <div className="px-5 py-4 md:px-8 md:py-6 border-b border-white/5 bg-white/5">
+                        <h2 className="text-lg md:text-xl font-semibold text-foreground">Profile Information</h2>
+                        <p className="text-xs md:text-sm text-muted-foreground mt-1">Update your account details and password</p>
                     </div>
-                    <div className="p-8">
+                    <div className="p-5 md:p-8">
                         <SettingsForm user={user} />
                     </div>
                 </div>

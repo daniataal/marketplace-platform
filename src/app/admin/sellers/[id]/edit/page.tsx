@@ -35,7 +35,7 @@ export default function EditSellerPage() {
     }
 
     return (
-        <div className="container mx-auto p-6 max-w-2xl">
+        <div className="container mx-auto px-0 md:px-6 py-2 md:py-6 max-w-2xl">
             <div className="mb-8">
                 <Link
                     href="/admin/deals/create"
@@ -44,8 +44,8 @@ export default function EditSellerPage() {
                     <ArrowLeft className="w-4 h-4 mr-1" />
                     Back to Selection
                 </Link>
-                <h1 className="text-3xl font-bold text-foreground">Edit Seller</h1>
-                <p className="text-muted-foreground mt-1">Update seller identity defaults</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Edit Seller</h1>
+                <p className="text-sm text-muted-foreground mt-1">Update seller identity defaults</p>
             </div>
 
             <form action={dispatch} className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">

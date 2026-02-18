@@ -19,15 +19,15 @@ export default async function AdminUsersPage() {
     });
 
     return (
-        <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-6">
+        <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground">Manage Users</h1>
-                    <p className="text-muted-foreground mt-1">View user details, balances, and manage roles</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Manage Users</h1>
+                    <p className="text-sm text-muted-foreground mt-1">View user details, balances, and manage roles</p>
                 </div>
                 <Link
                     href="/admin/users/create"
-                    className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
                 >
                     <UserPlus className="w-4 h-4" />
                     Create User
@@ -36,8 +36,8 @@ export default async function AdminUsersPage() {
 
             <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead className="bg-secondary/50 text-muted-foreground text-xs uppercase tracking-wider">
+                    <table className="w-full text-left min-w-[800px]">
+                        <thead className="bg-secondary/50 text-muted-foreground text-[10px] uppercase tracking-wider">
                             <tr>
                                 <th className="px-6 py-4 font-semibold">User Info</th>
                                 <th className="px-6 py-4 font-semibold">Role & Status</th>

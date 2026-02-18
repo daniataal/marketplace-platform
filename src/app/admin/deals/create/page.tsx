@@ -116,21 +116,21 @@ export default function CreateDealPage() {
     if (step === 'SELECT_SELLER') {
         return (
             <div className="container mx-auto p-6 max-w-5xl">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                     <div>
                         <Link
                             href="/admin/deals"
-                            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+                            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-2 sm:mb-4"
                         >
                             <ArrowLeft className="w-4 h-4 mr-1" />
                             Back to Deals
                         </Link>
-                        <h1 className="text-3xl font-bold text-foreground">Select Seller</h1>
-                        <p className="text-muted-foreground mt-1">Choose a seller profile to start a new deal</p>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Select Seller</h1>
+                        <p className="text-sm text-muted-foreground mt-1">Choose a seller profile to start a new deal</p>
                     </div>
                     <Link
                         href="/admin/sellers/create"
-                        className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+                        className="inline-flex items-center justify-center px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium shadow-lg shadow-primary/20"
                     >
                         <Plus className="w-4 h-4 mr-2" />
                         New Seller Profile
@@ -213,8 +213,8 @@ export default function CreateDealPage() {
 
     return (
         <div className="max-w-4xl mx-auto">
-            <div className="mb-6 flex items-center justify-between">
-                <div>
+            <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="w-full">
                     <button
                         onClick={() => setStep('SELECT_SELLER')}
                         className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
@@ -222,31 +222,33 @@ export default function CreateDealPage() {
                         <ArrowLeft className="w-4 h-4 mr-1" />
                         Change Seller
                     </button>
-                    <h1 className="text-3xl font-bold text-foreground">Create New Deal</h1>
-                    <p className="text-muted-foreground mt-1">For {sellerDetails.companyName}</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Create New Deal</h1>
+                    <p className="text-sm text-muted-foreground mt-1">For {sellerDetails.companyName}</p>
                 </div>
 
                 {/* Live Market Price Widget */}
-                <div className="bg-card border border-border rounded-xl p-4 shadow-sm flex items-center gap-4">
+                <div className="bg-card border border-border rounded-xl p-4 shadow-sm flex items-center justify-between gap-4 w-full md:w-auto md:min-w-[280px]">
                     <div>
-                        <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">LBMA Gold Price</div>
-                        <div className="text-2xl font-mono font-bold text-foreground">
+                        <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">LBMA Gold Price</div>
+                        <div className="text-xl sm:text-2xl font-mono font-bold text-foreground flex items-baseline gap-1">
                             {isLoadingPrice ? (
-                                'Loading...'
+                                <span className="text-sm animate-pulse">Loading...</span>
                             ) : priceError ? (
                                 <span className="text-destructive text-lg">API Error</span>
                             ) : marketPrice > 0 ? (
-                                `$${marketPrice.toLocaleString()}`
+                                <>
+                                    <span>${marketPrice.toLocaleString()}</span>
+                                    <span className="text-xs text-muted-foreground font-normal">/kg</span>
+                                </>
                             ) : (
-                                'Waiting...'
+                                <span className="text-sm">Waiting...</span>
                             )}
-                            {marketPrice > 0 && !priceError && <span className="text-sm text-muted-foreground font-normal ml-1">/kg</span>}
                         </div>
                     </div>
                     <button
                         onClick={refreshPrice}
                         disabled={isLoadingPrice}
-                        className="p-2 bg-secondary hover:bg-secondary/80 rounded-lg transition-colors"
+                        className="p-2.5 bg-secondary hover:bg-secondary/80 rounded-lg transition-colors border border-border/50"
                         title="Refresh Base Market Price"
                     >
                         <RefreshCw className={`w-4 h-4 ${isLoadingPrice ? 'animate-spin' : ''}`} />

@@ -11,16 +11,18 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
     const user = await getUserDetails(id);
 
     return (
-        <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center gap-4">
-                <Link href="/admin/users" className="p-2 bg-secondary/50 rounded-lg hover:bg-secondary transition-colors">
-                    <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-                </Link>
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground">{user.name || 'Unknown User'}</h1>
-                    <p className="text-muted-foreground text-sm font-mono">{user.email} • ID: {user.id}</p>
+        <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="flex items-center gap-4">
+                    <Link href="/admin/users" className="p-2 bg-secondary/50 rounded-lg hover:bg-secondary transition-colors">
+                        <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+                    </Link>
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{user.name || 'Unknown User'}</h1>
+                        <p className="text-xs sm:text-sm text-muted-foreground font-mono truncate max-w-[200px] sm:max-w-none">{user.email} • ID: {user.id}</p>
+                    </div>
                 </div>
-                <div className="ml-auto">
+                <div className="sm:ml-auto w-full sm:w-auto flex justify-end">
                     <UserActions
                         userId={user.id}
                         currentRole={user.role}
@@ -113,7 +115,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                     <h3 className="font-bold text-foreground">Transaction History</h3>
                 </div>
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm">
+                    <table className="w-full text-left text-sm min-w-[700px]">
                         <thead className="bg-secondary/50 text-muted-foreground text-xs uppercase tracking-wider">
                             <tr>
                                 <th className="px-6 py-3 font-semibold">Date</th>
