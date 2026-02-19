@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { DeleteDealButton } from "@/components/admin/DeleteDealButton";
-import { PlusCircle, Pencil } from "lucide-react";
+import { PlusCircle, Pencil, ShoppingBag } from "lucide-react";
 import { Deal } from "@prisma/client";
 
 export const dynamic = 'force-dynamic';
@@ -18,13 +18,22 @@ export default async function AdminDashboard() {
                     <h1 className="text-2xl md:text-3xl font-bold text-foreground">Admin Dashboard</h1>
                     <p className="text-sm text-muted-foreground mt-1">Manage platform deals and users</p>
                 </div>
-                <Link
-                    href="/admin/deals/create"
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-colors font-medium shadow-lg shadow-primary/20"
-                >
-                    <PlusCircle className="w-4 h-4" />
-                    New Deal
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <Link
+                        href="/admin/purchases"
+                        className="flex items-center justify-center gap-2 bg-secondary text-foreground px-4 py-2.5 rounded-lg hover:bg-secondary/80 transition-colors font-medium border border-border"
+                    >
+                        <ShoppingBag className="w-4 h-4" />
+                        Manage Logistics
+                    </Link>
+                    <Link
+                        href="/admin/deals/create"
+                        className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-colors font-medium shadow-lg shadow-primary/20"
+                    >
+                        <PlusCircle className="w-4 h-4" />
+                        New Deal
+                    </Link>
+                </div>
             </div>
 
             <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">

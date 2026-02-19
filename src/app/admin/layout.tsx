@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { LayoutDashboard, PlusCircle, LogOut, Settings, FileCheck, Menu, X } from "lucide-react";
+import { LayoutDashboard, PlusCircle, LogOut, Settings, FileCheck, Menu, X, ShoppingBag } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
 
@@ -17,6 +17,7 @@ export default function AdminLayout({
     const navLinks = [
         { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
         { href: "/admin/deals/create", label: "Create Deal", icon: PlusCircle },
+        { href: "/admin/purchases", label: "Manage Purchases", icon: ShoppingBag },
         { href: "/admin/exports", label: "Pending Exports", icon: FileCheck },
         { href: "/admin/users", label: "Manage Users", icon: LayoutDashboard },
         { href: "/settings", label: "Settings", icon: Settings },

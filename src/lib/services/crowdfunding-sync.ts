@@ -1,12 +1,40 @@
 import { prisma } from "@/lib/prisma";
 
 export class CrowdfundingSyncService {
+    static async syncDeliveryToCrowdfunding(purchaseId: string) {
+        try {
+            const CROWDFUNDING_API = process.env.CROWDFUNDING_API_URL || "http://localhost:3000/api/marketplace/commodities";
+            console.log(`[CrowdfundingSync] Notifying crowdfunding of delivery for shipment ${purchaseId}`);
+
+            const response = await fetch(CROWDFUNDING_API, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    shipmentId: purchaseId,
+                    status: "ARRIVED"
+                })
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                console.error(`[CrowdfundingSync] Failed to sync delivery to crowdfunding: ${text}`);
+            } else {
+                console.log(`[CrowdfundingSync] Successfully marked shipment ${purchaseId} as ARRIVED in crowdfunding`);
+            }
+        } catch (error) {
+            console.error('[CrowdfundingSync] Error in syncDeliveryToCrowdfunding:', error);
+        }
+    }
+
     /**
      * Re-pushes a periodic deal to the crowdfunding platform by creating a new 
      * Pending Export and a recurring Purchase record.
      */
     static async repushPeriodicDeal(lastPurchaseId: string) {
         try {
+            // 1. First, mark the current one as delivered in Crowdfunding
+            await this.syncDeliveryToCrowdfunding(lastPurchaseId);
+
             const lastPurchase = await prisma.purchase.findUnique({
                 where: { id: lastPurchaseId },
                 include: { deal: true }
